@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Equipment } from '../models/equipment.model';
+import { Equipment, CreateEquipmentDto } from '../models/equipment.model';
 
 @Injectable({
     providedIn: 'root'
@@ -20,6 +20,16 @@ export class EquipmentService {
     getEquipment(): Observable<Equipment[]> {
 
         return this.http.get<Equipment[]>(this.apiUrl, {
+            headers: {
+                'x-api-key': this.apiKey
+            }
+        });
+    }
+
+    // Create new equipment in the backend
+    addEquipment(equipment: CreateEquipmentDto): Observable<Equipment> {
+
+        return this.http.post<Equipment>(this.apiUrl, equipment, {
             headers: {
                 'x-api-key': this.apiKey
             }

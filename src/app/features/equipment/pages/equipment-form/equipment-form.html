@@ -1,0 +1,128 @@
+<!-- Card containing the equipment creation form -->
+<mat-card class="equipment-form-card">
+    <mat-card-header>
+        <mat-card-title>Create Equipment</mat-card-title>
+        <mat-card-subtitle>Enter the details of the equipment you want to add.</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+        <!-- Reactive form connected to the equipment form in the component -->
+        <form [formGroup]="equipmentForm" (ngSubmit)="onSubmit()" class="equipment-form">
+
+            <!-- Display a progress bar while the equipment is being saved -->
+            @if (saving()) {
+                <mat-progress-bar mode="buffer" />
+            }
+
+            <!-- Equipment name field with validation messages -->
+            <mat-form-field appearance="outline">
+                <mat-label>Equipment Name</mat-label>
+                <input
+                    matInput
+                    type="text"
+                    formControlName="name"
+                    placeholder="e.g. Canon EOS R6 Camera"
+                />
+
+                <!-- Display the relevant validation error for the equipment name -->
+                @if (equipmentForm.controls.name.hasError('required')) {
+                    <mat-error>Equipment name is required</mat-error>
+                } @else if (equipmentForm.controls.name.hasError('minlength')) {
+                    <mat-error>Name must be at least 2 characters</mat-error>
+                } @else if (equipmentForm.controls.name.hasError('maxlength')) {
+                    <mat-error>Name must be 100 characters or fewer</mat-error>
+                } @else if (equipmentForm.controls.name.hasError('blank')) {
+                    <mat-error>Name cannot contain only spaces</mat-error>
+                }
+            </mat-form-field>
+
+            <!-- Equipment description field with validation messages -->
+            <mat-form-field appearance="outline">
+                <mat-label>Description</mat-label>
+                <textarea
+                    matInput
+                    formControlName="description"
+                    placeholder="Enter an equipment description"
+                    rows="4"
+                ></textarea>
+
+                <!-- Display the relevant validation error for the description -->
+                @if (equipmentForm.controls.description.hasError('required')) {
+                    <mat-error>Description is required</mat-error>
+                } @else if (equipmentForm.controls.description.hasError('maxlength')) {
+                    <mat-error>Description must be 500 characters or fewer</mat-error>
+                } @else if (equipmentForm.controls.description.hasError('blank')) {
+                    <mat-error>Description cannot contain only spaces</mat-error>
+                }
+            </mat-form-field>
+
+            <!-- Daily rental rate field with validation messages -->
+            <mat-form-field appearance="outline">
+                <mat-label>Daily Rate (€)</mat-label>
+                <input
+                    matInput
+                    type="number"
+                    formControlName="dailyRate"
+                    min="0.01"
+                    step="0.01"
+                    placeholder="e.g. 85"
+                />
+
+                <!-- Ensure the daily rate is provided and greater than zero -->
+                @if (equipmentForm.controls.dailyRate.hasError('required')) {
+                    <mat-error>Daily rate is required</mat-error>
+                } @else if (equipmentForm.controls.dailyRate.hasError('min')) {
+                    <mat-error>Daily rate must be greater than zero</mat-error>
+                }
+            </mat-form-field>
+
+            <!-- Equipment category selection -->
+            <div>
+                <label for="category">Category:</label>
+                <select id="category" formControlName="category">
+                    <option value="Camera">Camera</option>
+                    <option value="Audio">Audio</option>
+                    <option value="Lighting">Lighting</option>
+                    <option value="Computer">Computer</option>
+                    <option value="Tool">Tool</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <!-- Equipment status selection -->
+            <div>
+                <label for="status">Status:</label>
+                <select id="status" formControlName="status">
+                    <option value="Available">Available</option>
+                    <option value="Maintenance">Maintenance</option>
+                    <option value="Retired">Retired</option>
+                </select>
+            </div>
+
+            <!-- Equipment condition selection -->
+            <div>
+                <label for="condition">Condition:</label>
+                <select id="condition" formControlName="condition">
+                    <option value="Excellent">Excellent</option>
+                    <option value="Good">Good</option>
+                    <option value="Fair">Fair</option>
+                    <option value="Poor">Poor</option>
+                </select>
+            </div>
+
+            <!-- Display an error message if the API request fails -->
+            @if (saveError(); as message) {
+                <p role="alert">{{ message }}</p>
+            }
+
+            <!-- Form submission and cancellation actions -->
+            <div class="button-group">
+                <button matButton="filled" type="submit" [disabled]="equipmentForm.invalid || saving()">
+                    {{ saving() ? 'Saving...' : 'Create Equipment' }}
+                </button>
+
+                <a matButton routerLink="/equipment">Cancel</a>
+            </div>
+        </form>
+    </mat-card-content>
+</mat-card>

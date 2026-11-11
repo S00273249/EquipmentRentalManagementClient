@@ -34,5 +34,14 @@ export interface Equipment {
     condition: EquipmentCondition;
     createdAt: string;
     updatedAt: string;
-    __v?: number;
+}
+
+// Data required when creating a new equipment record
+export interface CreateEquipmentDto {
+    name: string;
+    description: string;
+    dailyRate: number;
+    category: EquipmentCategory;
+    status: EquipmentStatus;
+    condition: EquipmentCondition;
 }

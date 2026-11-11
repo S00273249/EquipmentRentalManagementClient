@@ -1,0 +1,28 @@
+.equipment-form-card {
+    max-width: 32rem;
+    margin: 2rem auto;
+}
+
+.equipment-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.equipment-form mat-form-field {
+    width: 100%;
+}
+
+.equipment-form select {
+    width: 100%;
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+    font: inherit;
+}
+
+.button-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
