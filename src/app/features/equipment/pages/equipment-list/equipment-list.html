@@ -1,0 +1,26 @@
+<h2>Equipment Inventory</h2>
+
+@if (errorMessage) {
+    <p>{{ errorMessage }}</p>
+} @else {
+    @if (equipment$ | async; as equipment) {
+        @if (equipment.length > 0) {
+            <div>
+                @for (item of equipment; track item._id) {
+                    <div>
+                        <h3>{{ item.name }}</h3>
+                        <p>{{ item.description }}</p>
+                        <p>Category: {{ item.category }}</p>
+                        <p>Daily Rate: €{{ item.dailyRate }}</p>
+                        <p>Status: {{ item.status }}</p>
+                        <p>Condition: {{ item.condition }}</p>
+                    </div>
+                }
+            </div>
+        } @else {
+            <p>No equipment found.</p>
+        }
+    } @else {
+        <p>Loading equipment...</p>
+    }
+}
