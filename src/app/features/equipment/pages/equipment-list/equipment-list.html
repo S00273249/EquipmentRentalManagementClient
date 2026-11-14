@@ -1,4 +1,10 @@
-<h2>Equipment Inventory</h2>
+<div class="inventory-header">
+    <h2>Equipment Inventory</h2>
+
+    <a matButton="filled" routerLink="/equipment/new">
+        Add Equipment
+    </a>
+</div>
 
 @if (errorMessage) {
     <p>{{ errorMessage }}</p>
@@ -14,6 +20,10 @@
                         <p>Daily Rate: €{{ item.dailyRate }}</p>
                         <p>Status: {{ item.status }}</p>
                         <p>Condition: {{ item.condition }}</p>
+
+                        <a matButton="outlined" [routerLink]="['/equipment', item._id, 'edit']">
+                            Edit
+                        </a>
                     </div>
                 }
             </div>

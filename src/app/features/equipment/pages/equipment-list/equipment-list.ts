@@ -1,12 +1,18 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
 import { Observable, catchError, of } from 'rxjs';
 import { Equipment } from '../../models/equipment.model';
 import { EquipmentService } from '../../services/equipment';
 
 @Component({
     selector: 'app-equipment-list',
-    imports: [AsyncPipe],
+    imports: [
+        AsyncPipe,
+        RouterLink,
+        MatButtonModule
+    ],
     templateUrl: './equipment-list.html',
     styleUrl: './equipment-list.scss'
 })

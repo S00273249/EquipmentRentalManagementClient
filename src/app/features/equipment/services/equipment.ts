@@ -26,10 +26,30 @@ export class EquipmentService {
         });
     }
 
+    // Retrieve a single equipment item by ID
+    getEquipmentById(id: string): Observable<Equipment> {
+
+        return this.http.get<Equipment>(`${this.apiUrl}/${id}`, {
+            headers: {
+                'x-api-key': this.apiKey
+            }
+        });
+    }
+
     // Create new equipment in the backend
     addEquipment(equipment: CreateEquipmentDto): Observable<Equipment> {
 
         return this.http.post<Equipment>(this.apiUrl, equipment, {
+            headers: {
+                'x-api-key': this.apiKey
+            }
+        });
+    }
+
+    // Update existing equipment in the backend
+    updateEquipment(id: string, equipment: CreateEquipmentDto): Observable<Equipment> {
+
+        return this.http.put<Equipment>(`${this.apiUrl}/${id}`, equipment, {
             headers: {
                 'x-api-key': this.apiKey
             }

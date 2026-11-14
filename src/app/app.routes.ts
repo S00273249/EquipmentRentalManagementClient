@@ -15,5 +15,9 @@ export const routes: Routes = [
     {
         path: 'equipment/new',
         component: EquipmentForm
+    },
+    {
+        path: 'equipment/:id/edit',
+        component: EquipmentForm
     }
 ];
