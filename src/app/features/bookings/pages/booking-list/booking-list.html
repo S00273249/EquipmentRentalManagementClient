@@ -1,0 +1,45 @@
+<div class="inventory-header">
+    <h1>Bookings</h1>
+    <button mat-raised-button color="primary" routerLink="/bookings/new">
+        Add Booking
+    </button>
+</div>
+
+@if (errorMessage) {
+    <p class="error-message">{{ errorMessage }}</p>
+}
+
+@if (bookings$ | async; as bookings) {
+    @if (bookings.length === 0 && !errorMessage) {
+        <p>No bookings found.</p>
+    }
+
+    @for (booking of bookings; track booking._id) {
+        <div class="booking-card">
+            <h3>{{ booking.customerName }}</h3>
+
+            <p><strong>Equipment:</strong> {{ booking.equipmentName }}</p>
+            <p><strong>Start date:</strong> {{ booking.startDate | date:'mediumDate' }}</p>
+            <p><strong>End date:</strong> {{ booking.endDate | date:'mediumDate' }}</p>
+            <p><strong>Status:</strong> {{ booking.status }}</p>
+            <p><strong>Daily rate:</strong> {{ booking.dailyRate | currency:'EUR' }}</p>
+            <p><strong>Total cost:</strong> {{ booking.totalCost | currency:'EUR' }}</p>
+
+            <div class="booking-actions">
+                <button
+                    mat-raised-button
+                    color="primary"
+                    [routerLink]="['/bookings', booking._id, 'edit']">
+                    Edit
+                </button>
+
+                <button
+                    mat-raised-button
+                    color="warn"
+                    (click)="deleteBooking(booking._id, booking.customerName)">
+                    Delete
+                </button>
+            </div>
+        </div>
+    }
+}

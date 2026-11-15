@@ -1,0 +1,33 @@
+.inventory-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.booking-card {
+    padding: 16px;
+    margin-bottom: 16px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+
+    h3 {
+        margin-top: 0;
+    }
+
+    p {
+        margin: 8px 0;
+    }
+}
+
+.booking-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.error-message {
+    color: #d32f2f;
+}
