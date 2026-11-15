@@ -4,7 +4,7 @@ import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Observable, Subject, catchError, of, startWith, switchMap } from 'rxjs';
-import { Equipment } from '../../models/equipment.model';
+import { Equipment } from '../../models/equipment';
 import { EquipmentService } from '../../services/equipment';
 
 @Component({

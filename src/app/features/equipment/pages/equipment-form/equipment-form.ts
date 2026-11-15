@@ -7,7 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { EquipmentCategory, EquipmentStatus, EquipmentCondition, CreateEquipmentDto } from '../../models/equipment.model';
+import { EquipmentCategory, EquipmentStatus, EquipmentCondition, CreateEquipmentDto } from '../../models/equipment';
 import { EquipmentService } from '../../services/equipment';
 import { notBlank } from '../../../../shared/validators/not-blank.validator';
 
