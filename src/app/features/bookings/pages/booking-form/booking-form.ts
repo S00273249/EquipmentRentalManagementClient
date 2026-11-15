@@ -15,6 +15,7 @@ import { EquipmentService } from '../../../equipment/services/equipment';
 import { Customer } from '../../../customers/models/customer';
 import { Equipment } from '../../../equipment/models/equipment';
 import { dateRangeValidator } from '../../../../shared/validators/date-range.validator';
+import { dateBoundsValidator } from '../../../../shared/validators/date-bounds.validator';
 
 @Component({
     selector: 'app-booking-form',
@@ -78,12 +79,32 @@ export class BookingForm implements OnInit {
         'Cancelled'
     ];
 
+    // Calculate the permitted date range as 10 years in the past and 5 years in the future
+    minDate = this.formatDate(this.getDateOffset(-10));
+    maxDate = this.formatDate(this.getDateOffset(5));
+
+    // Calculate a date a specified number of years before or after today
+    private getDateOffset(years: number): Date {
+        const date = new Date();
+        date.setFullYear(date.getFullYear() + years);
+        return date;
+    }
+
+    // Format a date as YYYY-MM-DD for use with HTML date inputs
+    private formatDate(date: Date): string {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+
+        return `${year}-${month}-${day}`;
+    }
+
     // Create the booking form and define its validation rules
     bookingForm = this.fb.group({
         customerId: ['', Validators.required],
         equipmentId: ['', Validators.required],
-        startDate: ['', Validators.required],
-        endDate: ['', Validators.required],
+        startDate: ['', [Validators.required, dateBoundsValidator(this.minDate, this.maxDate)]],
+        endDate: ['', [Validators.required, dateBoundsValidator(this.minDate, this.maxDate)]],
         status: ['Pending' as BookingStatus, Validators.required]
     }, {
 

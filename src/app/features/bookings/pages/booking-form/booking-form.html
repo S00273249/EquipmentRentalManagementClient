@@ -39,17 +39,23 @@
 
         <mat-form-field appearance="outline">
             <mat-label>Start Date</mat-label>
-            <input matInput type="date" formControlName="startDate">
+            <input matInput type="date" formControlName="startDate" [min]="minDate" [max]="maxDate">
             @if (bookingForm.controls.startDate.hasError('required') && bookingForm.controls.startDate.touched) {
                 <mat-error>Please select a start date.</mat-error>
+            }
+            @if (bookingForm.controls.startDate.hasError('dateOutOfBounds') && bookingForm.controls.startDate.touched) {
+                <mat-error>Start date must be within the permitted date range.</mat-error>
             }
         </mat-form-field>
 
         <mat-form-field appearance="outline">
             <mat-label>End Date</mat-label>
-            <input matInput type="date" formControlName="endDate">
+            <input matInput type="date" formControlName="endDate" [min]="minDate" [max]="maxDate">
             @if (bookingForm.controls.endDate.hasError('required') && bookingForm.controls.endDate.touched) {
                 <mat-error>Please select an end date.</mat-error>
+            }
+            @if (bookingForm.controls.endDate.hasError('dateOutOfBounds') && bookingForm.controls.endDate.touched) {
+                <mat-error>End date must be within the permitted date range.</mat-error>
             }
         </mat-form-field>
 

@@ -5,6 +5,8 @@ import { CustomerList } from './features/customers/pages/customer-list/customer-
 import { CustomerForm } from './features/customers/pages/customer-form/customer-form';
 import { BookingList } from './features/bookings/pages/booking-list/booking-list';
 import { BookingForm } from './features/bookings/pages/booking-form/booking-form';
+import { MaintenanceList } from './features/maintenance/pages/maintenance-list/maintenance-list';
+import { MaintenanceForm } from './features/maintenance/pages/maintenance-form/maintenance-form';
 
 export const routes: Routes = [
     { path: '', redirectTo: 'equipment', pathMatch: 'full' },
@@ -19,5 +21,9 @@ export const routes: Routes = [
 
     { path: 'bookings', component: BookingList },
     { path: 'bookings/new', component: BookingForm },
-    { path: 'bookings/:id/edit', component: BookingForm }
+    { path: 'bookings/:id/edit', component: BookingForm },
+
+    { path: 'maintenance', component: MaintenanceList },
+    { path: 'maintenance/new', component: MaintenanceForm },
+    { path: 'maintenance/:id/edit', component: MaintenanceForm }
 ];
