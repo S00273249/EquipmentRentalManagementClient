@@ -1,0 +1,82 @@
+<mat-card class="customer-form-card">
+    <mat-card-header>
+        <mat-card-title>
+            {{ customerId ? 'Edit Customer' : 'Add Customer' }}
+        </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+        @if (loading()) {
+            <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+            <p>Loading customer details...</p>
+        }
+
+        @if (saveError()) {
+            <p role="alert">{{ saveError() }}</p>
+        }
+
+        <form [formGroup]="customerForm" (ngSubmit)="onSubmit()" class="customer-form">
+
+            <mat-form-field appearance="outline">
+                <mat-label>Customer Name</mat-label>
+                <input matInput formControlName="name">
+
+                @if (customerForm.controls.name.hasError('required')) {
+                    <mat-error>Name is required.</mat-error>
+                } @else if (customerForm.controls.name.hasError('minlength')) {
+                    <mat-error>Name must contain at least 2 characters.</mat-error>
+                } @else if (customerForm.controls.name.hasError('maxlength')) {
+                    <mat-error>Name cannot exceed 100 characters.</mat-error>
+                } @else if (customerForm.controls.name.hasError('blank')) {
+                    <mat-error>Name cannot contain only spaces.</mat-error>
+                }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label>Email Address</mat-label>
+                <input matInput type="email" formControlName="email">
+
+                @if (customerForm.controls.email.hasError('required')) {
+                    <mat-error>Email address is required.</mat-error>
+                } @else if (customerForm.controls.email.hasError('email')) {
+                    <mat-error>Enter a valid email address.</mat-error>
+                } @else if (customerForm.controls.email.hasError('blank')) {
+                    <mat-error>Email cannot contain only spaces.</mat-error>
+                }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label>Phone Number</mat-label>
+                <input matInput type="tel" formControlName="phone">
+
+                @if (customerForm.controls.phone.hasError('required')) {
+                    <mat-error>Phone number is required.</mat-error>
+                } @else if (customerForm.controls.phone.hasError('blank')) {
+                    <mat-error>Phone number cannot contain only spaces.</mat-error>
+                }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label>Address</mat-label>
+                <textarea matInput rows="3" formControlName="address"></textarea>
+
+                @if (customerForm.controls.address.hasError('required')) {
+                    <mat-error>Address is required.</mat-error>
+                } @else if (customerForm.controls.address.hasError('blank')) {
+                    <mat-error>Address cannot contain only spaces.</mat-error>
+                }
+            </mat-form-field>
+
+            <div class="button-group">
+                <button matButton="filled" type="submit" [disabled]="customerForm.invalid || saving() || loading()">
+                    {{ saving() ? 'Saving...' : customerId ? 'Update Customer' : 'Add Customer' }}
+                </button>
+
+                <a matButton="outlined" routerLink="/customers">
+                    Cancel
+                </a>
+            </div>
+
+        </form>
+    </mat-card-content>
+</mat-card>
