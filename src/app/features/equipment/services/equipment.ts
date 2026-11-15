@@ -56,4 +56,14 @@ export class EquipmentService {
         });
     }
 
+    // Delete an equipment item from the backend
+    deleteEquipment(id: string): Observable<Equipment> {
+
+        return this.http.delete<Equipment>(`${this.apiUrl}/${id}`, {
+            headers: {
+                'x-api-key': this.apiKey
+            }
+        });
+    }
+
 }

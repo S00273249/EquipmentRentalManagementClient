@@ -7,7 +7,7 @@
 </div>
 
 @if (errorMessage) {
-    <p>{{ errorMessage }}</p>
+    <p role="alert">{{ errorMessage }}</p>
 } @else {
     @if (equipment$ | async; as equipment) {
         @if (equipment.length > 0) {
@@ -21,9 +21,15 @@
                         <p>Status: {{ item.status }}</p>
                         <p>Condition: {{ item.condition }}</p>
 
-                        <a matButton="outlined" [routerLink]="['/equipment', item._id, 'edit']">
-                            Edit
-                        </a>
+                        <div class="equipment-actions">
+                            <a matButton="outlined" [routerLink]="['/equipment', item._id, 'edit']">
+                                Edit
+                            </a>
+
+                            <button matButton="outlined" type="button" (click)="deleteEquipment(item._id, item.name)">
+                                Delete
+                            </button>
+                        </div>
                     </div>
                 }
             </div>
