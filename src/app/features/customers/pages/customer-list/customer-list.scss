@@ -1,3 +1,4 @@
+/* Arrange the page heading and primary action horizontally */
 .inventory-header {
     display: flex;
     align-items: center;
@@ -5,11 +6,107 @@
     gap: 1rem;
     margin-bottom: 1.5rem;
     flex-wrap: wrap;
+
+    /* Keep the heading from creating unnecessary spacing */
+    h1 {
+        margin: 0;
+    }
 }
 
+/* Add some spacing below the page title */
+.page-heading p {
+    margin: 0.5rem 0 0;
+    color: var(--mat-sys-on-surface-variant);
+}
+
+/* Display customer cards in a responsive grid */
+.customer-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+    gap: 1.25rem;
+}
+
+/* Give each customer record its own card */
+.customer-card {
+    display: flex;
+    flex-direction: column;
+    padding: 1.25rem;
+    border: 1px solid var(--mat-sys-outline-variant);
+    border-radius: 12px;
+    background-color: var(--mat-sys-surface-container-low);
+    min-width: 0;
+
+    h2 {
+        margin: 0;
+        font-size: 1.2rem;
+    }
+}
+
+/* Separate the customer name from the remaining details */
+.customer-card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+/* Group the customer's contact information */
+.customer-details {
+    flex: 1;
+
+    p {
+        margin: 0.6rem 0;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+    }
+}
+
+/* Keep Edit and Delete buttons together */
 .customer-actions {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 1.5rem;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+/* Distinguish destructive actions from normal actions */
+.button-danger {
+    color: var(--mat-sys-error);
+}
+
+/* Display a message when there are no customer records */
+.empty-message {
+    padding: 2rem;
+    text-align: center;
+    border: 1px dashed var(--mat-sys-outline-variant);
+    border-radius: 12px;
+
+    h2 {
+        margin-top: 0;
+    }
+
+    p {
+        color: var(--mat-sys-on-surface-variant);
+    }
+}
+
+/* Use a single column on smaller screens */
+@media (max-width: 600px) {
+    .inventory-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .inventory-header a {
+        width: 100%;
+    }
+
+    .customer-list {
+        grid-template-columns: 1fr;
+    }
+
+    .customer-card {
+        padding: 1rem;
+    }
 }

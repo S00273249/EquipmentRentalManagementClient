@@ -1,21 +1,42 @@
+/* Centre the form card and limit its width for readability */
 .customer-form-card {
-    max-width: 32rem;
+    max-width: 600px;
     margin: 2rem auto;
+    padding: 1.5rem;
+    border: 1px solid var(--mat-sys-outline-variant);
+    border-radius: 12px;
+    background-color: var(--mat-sys-surface-container-low);
+    box-sizing: border-box;
 }
 
+/* Arrange form controls vertically with consistent spacing */
 .customer-form {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
+
+    /* Make Material form fields fill the available width */
+    mat-form-field {
+        width: 100%;
+    }
 }
 
-.customer-form mat-form-field {
-    width: 100%;
-}
-
+/* Keep form buttons together with consistent spacing */
 .button-group {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    margin-top: 1rem;
+    margin-top: 0.5rem;
+}
+
+/* Reduce card padding on smaller screens */
+@media (max-width: 600px) {
+    .customer-form-card {
+        margin: 1rem 0;
+        padding: 1rem;
+    }
+
+    .button-group {
+        flex-wrap: wrap;
+    }
 }

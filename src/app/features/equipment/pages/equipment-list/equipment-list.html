@@ -1,42 +1,63 @@
-<div class="inventory-header">
-    <h2>Equipment Inventory</h2>
+<div class="page-container">
+    <!-- Page heading and primary action -->
+    <div class="inventory-header">
+        <div class="page-heading">
+            <h1>Equipment Inventory</h1>
+            <p>View and manage your rental equipment.</p>
+        </div>
 
-    <a matButton="filled" routerLink="/equipment/new">
-        Add Equipment
-    </a>
-</div>
+        <a matButton="filled" routerLink="/equipment/new">
+            Add Equipment
+        </a>
+    </div>
 
-@if (errorMessage) {
-    <p role="alert">{{ errorMessage }}</p>
-} @else {
-    @if (equipment$ | async; as equipment) {
-        @if (equipment.length > 0) {
-            <div>
-                @for (item of equipment; track item._id) {
-                    <div>
-                        <h3>{{ item.name }}</h3>
-                        <p>{{ item.description }}</p>
-                        <p>Category: {{ item.category }}</p>
-                        <p>Daily Rate: €{{ item.dailyRate }}</p>
-                        <p>Status: {{ item.status }}</p>
-                        <p>Condition: {{ item.condition }}</p>
-
-                        <div class="equipment-actions">
-                            <a matButton="outlined" [routerLink]="['/equipment', item._id, 'edit']">
-                                Edit
-                            </a>
-
-                            <button matButton="outlined" type="button" (click)="deleteEquipment(item._id, item.name)">
-                                Delete
-                            </button>
-                        </div>
-                    </div>
-                }
-            </div>
-        } @else {
-            <p>No equipment found.</p>
-        }
+    <!-- Display any errors returned while loading equipment -->
+    @if (errorMessage) {
+        <p class="error-message" role="alert">{{ errorMessage }}</p>
     } @else {
-        <p>Loading equipment...</p>
+        @if (equipment$ | async; as equipment) {
+            @if (equipment.length > 0) {
+                <!-- Display equipment records in a responsive card grid -->
+                <div class="record-grid">
+                    @for (item of equipment; track item._id) {
+                        <div class="record-card">
+                            <div class="equipment-card-header">
+                                <h2>{{ item.name }}</h2>
+                                <span class="equipment-category">{{ item.category }}</span>
+                            </div>
+
+                            <p class="equipment-description">{{ item.description }}</p>
+
+                            <div class="equipment-details">
+                                <p><strong>Daily Rate:</strong> €{{ item.dailyRate }}</p>
+                                <p><strong>Status:</strong> {{ item.status }}</p>
+                                <p><strong>Condition:</strong> {{ item.condition }}</p>
+                            </div>
+
+                            <!-- Actions for the individual equipment record -->
+                            <div class="record-actions">
+                                <a matButton="outlined" [routerLink]="['/equipment', item._id, 'edit']">
+                                    Edit
+                                </a>
+
+                                <button matButton="outlined" class="button-danger" type="button" (click)="deleteEquipment(item._id, item.name)">
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                    }
+                </div>
+            } @else {
+                <div class="empty-message">
+                    <h2>No equipment found</h2>
+                    <p>There are currently no equipment records available.</p>
+                    <a matButton="filled" routerLink="/equipment/new">
+                        Add Your First Equipment
+                    </a>
+                </div>
+            }
+        } @else {
+            <p>Loading equipment...</p>
+        }
     }
-}
+</div>

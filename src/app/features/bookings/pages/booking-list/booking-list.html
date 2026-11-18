@@ -1,45 +1,67 @@
-<div class="inventory-header">
-    <h1>Bookings</h1>
-    <button mat-raised-button color="primary" routerLink="/bookings/new">
-        Add Booking
-    </button>
-</div>
-
-@if (errorMessage) {
-    <p class="error-message">{{ errorMessage }}</p>
-}
-
-@if (bookings$ | async; as bookings) {
-    @if (bookings.length === 0 && !errorMessage) {
-        <p>No bookings found.</p>
-    }
-
-    @for (booking of bookings; track booking._id) {
-        <div class="booking-card">
-            <h3>{{ booking.customerName }}</h3>
-
-            <p><strong>Equipment:</strong> {{ booking.equipmentName }}</p>
-            <p><strong>Start date:</strong> {{ booking.startDate | date:'mediumDate' }}</p>
-            <p><strong>End date:</strong> {{ booking.endDate | date:'mediumDate' }}</p>
-            <p><strong>Status:</strong> {{ booking.status }}</p>
-            <p><strong>Daily rate:</strong> {{ booking.dailyRate | currency:'EUR' }}</p>
-            <p><strong>Total cost:</strong> {{ booking.totalCost | currency:'EUR' }}</p>
-
-            <div class="booking-actions">
-                <button
-                    mat-raised-button
-                    color="primary"
-                    [routerLink]="['/bookings', booking._id, 'edit']">
-                    Edit
-                </button>
-
-                <button
-                    mat-raised-button
-                    color="warn"
-                    (click)="deleteBooking(booking._id, booking.customerName)">
-                    Delete
-                </button>
-            </div>
+<div class="page-container">
+    <!-- Page heading and primary action -->
+    <div class="inventory-header">
+        <div class="page-heading">
+            <h1>Bookings</h1>
+            <p>View and manage equipment rental bookings.</p>
         </div>
+
+        <a matButton="filled" routerLink="/bookings/new">
+            Add Booking
+        </a>
+    </div>
+
+    <!-- Display any errors returned while loading bookings -->
+    @if (errorMessage) {
+        <p class="error-message" role="alert">{{ errorMessage }}</p>
+    } @else {
+        @if (bookings$ | async; as bookings) {
+            @if (bookings.length > 0) {
+                <!-- Display booking records in a responsive card grid -->
+                <div class="booking-list">
+                    @for (booking of bookings; track booking._id) {
+                        <div class="booking-card">
+                            <div class="booking-card-header">
+                                <div class="booking-card-header">
+                                    <h2>{{ booking.customerName }}</h2>
+                                    <span class="booking-status" [class]="'booking-status booking-status-' + booking.status.toLowerCase()">
+                                        {{ booking.status }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="booking-details">
+                                <p><strong>Equipment:</strong> {{ booking.equipmentName }}</p>
+                                <p><strong>Start date:</strong> {{ booking.startDate | date:'mediumDate' }}</p>
+                                <p><strong>End date:</strong> {{ booking.endDate | date:'mediumDate' }}</p>
+                                <p><strong>Daily rate:</strong> {{ booking.dailyRate | currency:'EUR' }}</p>
+                                <p><strong>Total cost:</strong> {{ booking.totalCost | currency:'EUR' }}</p>
+                            </div>
+
+                            <!-- Actions for the individual booking record -->
+                            <div class="booking-actions">
+                                <a matButton="outlined" [routerLink]="['/bookings', booking._id, 'edit']">
+                                    Edit
+                                </a>
+
+                                <button matButton="outlined" class="button-danger" type="button" (click)="deleteBooking(booking._id, booking.customerName)">
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                    }
+                </div>
+            } @else {
+                <div class="empty-message">
+                    <h2>No bookings found</h2>
+                    <p>There are currently no rental bookings available.</p>
+                    <a matButton="filled" routerLink="/bookings/new">
+                        Add Your First Booking
+                    </a>
+                </div>
+            }
+        } @else {
+            <p>Loading bookings...</p>
+        }
     }
-}
+</div>

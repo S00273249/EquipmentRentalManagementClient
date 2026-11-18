@@ -1,65 +1,88 @@
+/* Align the page heading and primary action */
 .page-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 16px;
-    margin-bottom: 24px;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
 
     h1 {
-        margin: 0 0 8px;
+        margin: 0 0 0.5rem;
     }
 
     p {
         margin: 0;
-        color: #666;
+        color: var(--mat-sys-on-surface-variant);
     }
 }
 
+/* Display maintenance records in a responsive card grid */
 .maintenance-list {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+    gap: 1.25rem;
 }
 
+/* Individual maintenance record card */
 .maintenance-card {
-    padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    background-color: white;
+    display: flex;
+    flex-direction: column;
+    padding: 1.25rem;
+    border: 1px solid var(--mat-sys-outline-variant);
+    border-radius: 12px;
+    background-color: var(--mat-sys-surface-container-low);
+    box-sizing: border-box;
+    min-width: 0;
 
     h2 {
-        margin-top: 0;
+        margin: 0 0 1rem;
+        font-size: 1.125rem;
+        font-weight: 600;
     }
 
     p {
-        margin: 10px 0;
+        margin: 0.75rem 0;
+        line-height: 1.5;
+        color: var(--mat-sys-on-surface-variant);
     }
 }
 
+/* Keep maintenance record actions grouped at the bottom of each card */
 .maintenance-actions {
     display: flex;
-    gap: 8px;
-    margin-top: 16px;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: auto;
+    padding-top: 1.25rem;
+    flex-wrap: wrap;
 }
 
+/* Distinguish destructive actions from normal actions */
+.button-danger {
+    color: var(--mat-sys-error);
+}
+
+/* Display errors consistently */
 .error-message {
-    color: #d32f2f;
-    margin-bottom: 16px;
+    color: var(--mat-sys-error);
+    margin-bottom: 1rem;
 }
 
+/* Give empty-list messages enough space to stand out */
 .empty-message {
-    color: #666;
+    color: var(--mat-sys-on-surface-variant);
     text-align: center;
-    padding: 32px;
+    padding: 2rem 1rem;
 }
 
+/* Stack the page heading and action on smaller screens */
 @media (max-width: 600px) {
     .page-header {
         align-items: flex-start;
         flex-direction: column;
     }
 
-    .maintenance-list {
-        grid-template-columns: 1fr;
+    .page-header a {
+        width: 100%;
     }
 }

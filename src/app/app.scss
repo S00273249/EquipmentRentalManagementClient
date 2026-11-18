@@ -1,18 +1,58 @@
+/* Main application navigation bar */
 .main-navigation {
     display: flex;
-    gap: 1rem;
-    padding: 1rem 2rem;
-    background-color: #f5f5f5;
-    border-bottom: 1px solid #ddd;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 2rem;
 
+    /* Use the application's primary surface colour */
+    background-color: var(--mat-sys-surface-container-low);
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+
+    /* Navigation links */
     a {
-        text-decoration: none;
-        color: #333;
-        font-weight: 500;
-    }
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        padding: 0.65rem 1rem;
+        border-radius: 8px;
 
-    a.active {
-        color: #673ab7;
-        font-weight: 600;
+        color: var(--mat-sys-on-surface-variant);
+        text-decoration: none;
+        font-weight: 500;
+
+        /* Subtle hover effect */
+        &:hover {
+            background-color: var(--mat-sys-surface-container-high);
+            color: var(--mat-sys-primary);
+        }
+
+        /* Highlight the currently selected page */
+        &.active {
+            background-color: var(--mat-sys-secondary-container);
+            color: var(--mat-sys-on-secondary-container);
+            font-weight: 600;
+        }
+
+        /* Make keyboard navigation clearly visible */
+        &:focus-visible {
+            outline: 2px solid var(--mat-sys-primary);
+            outline-offset: 2px;
+        }
+    }
+}
+
+/* Allow navigation links to wrap on smaller screens */
+@media (max-width: 600px) {
+    .main-navigation {
+        gap: 0.25rem;
+        padding: 0.75rem 1rem;
+        flex-wrap: wrap;
+
+        a {
+            padding: 0.6rem 0.75rem;
+            font-size: 0.9rem;
+        }
     }
 }

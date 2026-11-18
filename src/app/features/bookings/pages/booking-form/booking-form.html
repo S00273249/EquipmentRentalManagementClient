@@ -1,87 +1,101 @@
-<h1>{{ bookingId ? 'Edit Booking' : 'Add Booking' }}</h1>
+<div class="page-container">
+    <mat-card class="booking-form-card">
+        <mat-card-header>
+            <mat-card-title>
+                {{ bookingId ? 'Edit Booking' : 'Add Booking' }}
+            </mat-card-title>
 
-@if (errorMessage) {
-    <p class="error-message">{{ errorMessage }}</p>
-}
+            <mat-card-subtitle>
+                {{ bookingId ? 'Update the details of this booking.' : 'Enter the details of the booking you want to create.' }}
+            </mat-card-subtitle>
+        </mat-card-header>
 
-@if (isLoading) {
-    <p>Loading...</p>
-} @else {
-    <form [formGroup]="bookingForm" (ngSubmit)="onSubmit()">
-
-        <mat-form-field appearance="outline">
-            <mat-label>Customer</mat-label>
-            <mat-select formControlName="customerId">
-                @for (customer of customers; track customer._id) {
-                    <mat-option [value]="customer._id">
-                        {{ customer.name }}
-                    </mat-option>
-                }
-            </mat-select>
-            @if (bookingForm.controls.customerId.hasError('required') && bookingForm.controls.customerId.touched) {
-                <mat-error>Please select a customer.</mat-error>
+        <mat-card-content>
+            @if (errorMessage) {
+                <p class="error-message" role="alert">{{ errorMessage }}</p>
             }
-        </mat-form-field>
 
-        <mat-form-field appearance="outline">
-            <mat-label>Equipment</mat-label>
-            <mat-select formControlName="equipmentId">
-                @for (item of equipment; track item._id) {
-                    <mat-option [value]="item._id">
-                        {{ item.name }}
-                    </mat-option>
-                }
-            </mat-select>
-            @if (bookingForm.controls.equipmentId.hasError('required') && bookingForm.controls.equipmentId.touched) {
-                <mat-error>Please select equipment.</mat-error>
+            @if (isLoading) {
+                <p>Loading booking details...</p>
+            } @else {
+                <form [formGroup]="bookingForm" (ngSubmit)="onSubmit()" class="booking-form">
+
+                    <mat-form-field appearance="outline">
+                        <mat-label>Customer</mat-label>
+                        <mat-select formControlName="customerId">
+                            @for (customer of customers; track customer._id) {
+                                <mat-option [value]="customer._id">
+                                    {{ customer.name }}
+                                </mat-option>
+                            }
+                        </mat-select>
+                        @if (bookingForm.controls.customerId.hasError('required') && bookingForm.controls.customerId.touched) {
+                            <mat-error>Please select a customer.</mat-error>
+                        }
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                        <mat-label>Equipment</mat-label>
+                        <mat-select formControlName="equipmentId">
+                            @for (item of equipment; track item._id) {
+                                <mat-option [value]="item._id">
+                                    {{ item.name }}
+                                </mat-option>
+                            }
+                        </mat-select>
+                        @if (bookingForm.controls.equipmentId.hasError('required') && bookingForm.controls.equipmentId.touched) {
+                            <mat-error>Please select equipment.</mat-error>
+                        }
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                        <mat-label>Start Date</mat-label>
+                        <input matInput type="date" formControlName="startDate" [min]="minDate" [max]="maxDate">
+                        @if (bookingForm.controls.startDate.hasError('required') && bookingForm.controls.startDate.touched) {
+                            <mat-error>Please select a start date.</mat-error>
+                        }
+                        @if (bookingForm.controls.startDate.hasError('dateOutOfBounds') && bookingForm.controls.startDate.touched) {
+                            <mat-error>Start date must be within the permitted date range.</mat-error>
+                        }
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                        <mat-label>End Date</mat-label>
+                        <input matInput type="date" formControlName="endDate" [min]="minDate" [max]="maxDate">
+                        @if (bookingForm.controls.endDate.hasError('required') && bookingForm.controls.endDate.touched) {
+                            <mat-error>Please select an end date.</mat-error>
+                        }
+                        @if (bookingForm.controls.endDate.hasError('dateOutOfBounds') && bookingForm.controls.endDate.touched) {
+                            <mat-error>End date must be within the permitted date range.</mat-error>
+                        }
+                    </mat-form-field>
+
+                    @if (bookingForm.hasError('invalidDateRange') && (bookingForm.controls.startDate.touched || bookingForm.controls.endDate.touched)) {
+                        <p class="error-message">
+                            The end date must be after the start date.
+                        </p>
+                    }
+
+                    <mat-form-field appearance="outline">
+                        <mat-label>Status</mat-label>
+                        <mat-select formControlName="status">
+                            @for (status of statuses; track status) {
+                                <mat-option [value]="status">{{ status }}</mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+
+                    <div class="form-actions">
+                        <button matButton="filled" type="submit" [disabled]="bookingForm.invalid || isLoading">
+                            {{ bookingId ? 'Update Booking' : 'Create Booking' }}
+                        </button>
+
+                        <a matButton="outlined" routerLink="/bookings">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
             }
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-            <mat-label>Start Date</mat-label>
-            <input matInput type="date" formControlName="startDate" [min]="minDate" [max]="maxDate">
-            @if (bookingForm.controls.startDate.hasError('required') && bookingForm.controls.startDate.touched) {
-                <mat-error>Please select a start date.</mat-error>
-            }
-            @if (bookingForm.controls.startDate.hasError('dateOutOfBounds') && bookingForm.controls.startDate.touched) {
-                <mat-error>Start date must be within the permitted date range.</mat-error>
-            }
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-            <mat-label>End Date</mat-label>
-            <input matInput type="date" formControlName="endDate" [min]="minDate" [max]="maxDate">
-            @if (bookingForm.controls.endDate.hasError('required') && bookingForm.controls.endDate.touched) {
-                <mat-error>Please select an end date.</mat-error>
-            }
-            @if (bookingForm.controls.endDate.hasError('dateOutOfBounds') && bookingForm.controls.endDate.touched) {
-                <mat-error>End date must be within the permitted date range.</mat-error>
-            }
-        </mat-form-field>
-
-        @if (bookingForm.hasError('invalidDateRange') && (bookingForm.controls.startDate.touched || bookingForm.controls.endDate.touched)) {
-            <p class="error-message">
-                The end date must be after the start date.
-            </p>
-        }
-
-        <mat-form-field appearance="outline">
-            <mat-label>Status</mat-label>
-            <mat-select formControlName="status">
-                @for (status of statuses; track status) {
-                    <mat-option [value]="status">{{ status }}</mat-option>
-                }
-            </mat-select>
-        </mat-form-field>
-
-        <div class="form-actions">
-            <button mat-raised-button color="primary" type="submit">
-                {{ bookingId ? 'Update Booking' : 'Create Booking' }}
-            </button>
-
-            <button mat-button type="button" routerLink="/bookings">
-                Cancel
-            </button>
-        </div>
-    </form>
-}
+        </mat-card-content>
+    </mat-card>
+</div>
