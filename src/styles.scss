@@ -1,18 +1,32 @@
 /* Import Angular Material theming utilities */
 @use '@angular/material' as mat;
 
-/* Configure the application's Angular Material 3 theme */
+/* Configure the application's Angular Material 3 blue theme */
 html {
     height: 100%;
 
     @include mat.theme((
         color: (
-            primary: mat.$magenta-palette,
-            tertiary: mat.$violet-palette,
+            primary: mat.$blue-palette,
+            tertiary: mat.$azure-palette,
         ),
         typography: Roboto,
         density: 0,
     ));
+}
+
+/* Define the application's blue colour palette */
+:root {
+    --app-background: #F2F7FD;
+    --app-navigation: #E2EEFC;
+    --app-form-card: #EAF3FF;
+    --app-record-card: #F7FAFF;
+    --app-primary: #3978BC;
+    --app-primary-hover: #2D659F;
+    --app-secondary: #BBD5F5;
+    --app-border: #C7D9EF;
+    --app-text: #25364B;
+    --app-text-secondary: #53677F;
 }
 
 /* Apply consistent sizing across all application elements */
@@ -23,8 +37,8 @@ html {
 /* Set the application's global appearance */
 body {
     color-scheme: light;
-    background-color: var(--mat-sys-surface);
-    color: var(--mat-sys-on-surface);
+    background-color: var(--app-background);
+    color: var(--app-text);
     font: var(--mat-sys-body-medium);
     margin: 0;
     min-height: 100%;
@@ -41,13 +55,13 @@ app-root {
     width: 100%;
     max-width: 1440px;
     margin: 0 auto;
-    padding: 2rem;
+    padding: clamp(1rem, 3vw, 2rem);
 }
 
 /* Standardise page headings */
 h1 {
-    color: var(--mat-sys-on-surface);
-    font-size: 1.75rem;
+    color: var(--app-text);
+    font-size: clamp(1.5rem, 2.5vw, 1.75rem);
     font-weight: 600;
     line-height: 1.3;
     margin: 0;
@@ -56,7 +70,7 @@ h1 {
 /* Standardise secondary headings */
 h2,
 h3 {
-    color: var(--mat-sys-on-surface);
+    color: var(--app-text);
 }
 
 /* Standardise the heading and action area on list pages */
@@ -72,7 +86,7 @@ h3 {
 /* Keep page descriptions visually secondary to their headings */
 .page-heading p {
     margin: 0.5rem 0 0;
-    color: var(--mat-sys-on-surface-variant);
+    color: var(--app-text-secondary);
     line-height: 1.5;
 }
 
@@ -83,23 +97,24 @@ h3 {
     gap: 1.25rem;
 }
 
-/* Give each record a consistent card appearance */
+/* Give each record a consistent light blue card appearance */
 .record-card {
     display: flex;
     flex-direction: column;
     min-width: 0;
     padding: 1.25rem;
-    border: 1px solid var(--mat-sys-outline-variant);
+    border: 1px solid var(--app-border);
     border-radius: 12px;
-    background-color: var(--mat-sys-surface-container-low);
+    background-color: var(--app-record-card);
 }
 
-/* Keep record actions together and allow them to wrap */
+/* Keep record actions together at the bottom of each card */
 .record-actions {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    margin-top: 1rem;
+    margin-top: auto;
+    padding-top: 1rem;
     flex-wrap: wrap;
 }
 
@@ -112,15 +127,16 @@ h3 {
 .empty-message {
     padding: 2rem;
     text-align: center;
-    border: 1px dashed var(--mat-sys-outline-variant);
+    border: 1px dashed var(--app-border);
     border-radius: 12px;
+    background-color: var(--app-record-card);
 
     h2 {
         margin-top: 0;
     }
 
     p {
-        color: var(--mat-sys-on-surface-variant);
+        color: var(--app-text-secondary);
     }
 }
 
@@ -136,9 +152,9 @@ h3 {
     max-width: 600px;
     margin: 1.5rem auto;
     padding: 1.25rem;
-    border: 1px solid var(--mat-sys-outline-variant);
+    border: 1px solid var(--app-border);
     border-radius: 12px;
-    background-color: var(--mat-sys-surface-container-low);
+    background-color: var(--app-form-card);
 }
 
 /* Give form headings and descriptions enough separation */
@@ -148,15 +164,30 @@ h3 {
     mat-card-title {
         margin-bottom: 0.5rem;
         line-height: 1.3;
+        color: var(--app-text);
     }
 
     mat-card-subtitle {
         line-height: 1.5;
+        color: var(--app-text-secondary);
+    }
+}
+
+/* Arrange form controls vertically with consistent spacing */
+.form-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+
+    mat-form-field {
+        width: 100%;
+        margin-bottom: -0.25rem;
     }
 }
 
 /* Arrange form actions consistently */
-.form-actions {
+.form-actions,
+.button-group {
     display: flex;
     align-items: center;
     gap: 0.75rem;
@@ -174,6 +205,7 @@ h3 {
     label {
         font-size: 0.9rem;
         font-weight: 500;
+        color: var(--app-text);
     }
 
     select {
@@ -181,14 +213,14 @@ h3 {
         min-height: 3.5rem;
         padding: 0.75rem;
         font: inherit;
-        border: 1px solid var(--mat-sys-outline);
+        border: 1px solid var(--app-border);
         border-radius: 6px;
-        background-color: var(--mat-sys-surface);
-        color: var(--mat-sys-on-surface);
+        background-color: #F7FAFF;
+        color: var(--app-text);
     }
 
     select:focus-visible {
-        outline: 2px solid var(--mat-sys-primary);
+        outline: 2px solid var(--app-primary);
         outline-offset: 1px;
     }
 }
@@ -201,33 +233,30 @@ button {
 
 /* Provide a visible keyboard focus indicator */
 *:focus-visible {
-    outline: 2px solid var(--mat-sys-primary);
+    outline: 2px solid var(--app-primary);
     outline-offset: 3px;
 }
 
-/* Reduce page spacing on smaller screens */
+/* Adjust shared layouts for tablet-sized screens */
 @media (max-width: 768px) {
-    .page-container {
-        padding: 1.25rem;
+    .inventory-header {
+        align-items: flex-start;
     }
 
-    h1 {
-        font-size: 1.5rem;
+    .record-grid {
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
     }
 }
 
-/* Use compact spacing on mobile screens */
+/* Use compact spacing and single-column layouts on mobile screens */
 @media (max-width: 600px) {
-    .page-container {
-        padding: 1rem;
-    }
-
     .inventory-header {
-        align-items: flex-start;
         flex-direction: column;
+        align-items: stretch;
     }
 
-    .inventory-header > a {
+    .inventory-header > a,
+    .inventory-header > button {
         width: 100%;
     }
 
@@ -243,12 +272,17 @@ button {
         flex-wrap: wrap;
     }
 
+    .empty-message {
+        padding: 1.5rem 1rem;
+    }
+
     .form-card {
-        margin: 1rem 0;
+        margin: 1rem auto;
         padding: 1rem;
     }
 
-    .form-actions {
+    .form-actions,
+    .button-group {
         flex-direction: column;
         align-items: stretch;
 

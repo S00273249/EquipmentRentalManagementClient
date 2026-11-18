@@ -1,88 +1,93 @@
 <div class="page-container">
-<mat-card class="customer-form-card">
-    <mat-card-header>
-        <mat-card-title>
-            {{ customerId ? 'Edit Customer' : 'Add Customer' }}
-        </mat-card-title>
+    <mat-card class="form-card">
+        <!-- Keep the form heading and description inside the card -->
+        <mat-card-header class="form-card-header">
+            <mat-card-title>
+                {{ customerId ? 'Edit Customer' : 'Add Customer' }}
+            </mat-card-title>
 
-        <mat-card-subtitle>
-            {{ customerId ? 'Update the details of this customer.' : 'Enter the details of the customer you want to add.' }}
-        </mat-card-subtitle>
-    </mat-card-header>
+            <mat-card-subtitle>
+                {{ customerId ? 'Update the details of this customer.' : 'Enter the details of the customer you want to add.' }}
+            </mat-card-subtitle>
+        </mat-card-header>
 
-    <mat-card-content>
-        @if (loading()) {
-            <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-            <p>Loading customer details...</p>
-        }
-
-        @if (saveError()) {
-            <p role="alert">{{ saveError() }}</p>
-        }
-
-        <form [formGroup]="customerForm" (ngSubmit)="onSubmit()" class="customer-form">
-
-            <mat-form-field appearance="outline">
-                <mat-label>Customer Name</mat-label>
-                <input matInput formControlName="name">
-
-                @if (customerForm.controls.name.hasError('required')) {
-                    <mat-error>Name is required.</mat-error>
-                } @else if (customerForm.controls.name.hasError('minlength')) {
-                    <mat-error>Name must contain at least 2 characters.</mat-error>
-                } @else if (customerForm.controls.name.hasError('maxlength')) {
-                    <mat-error>Name cannot exceed 100 characters.</mat-error>
-                } @else if (customerForm.controls.name.hasError('blank')) {
-                    <mat-error>Name cannot contain only spaces.</mat-error>
+        <mat-card-content>
+            @if (loading()) {
+                <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+                <p>Loading customer details...</p>
+            } @else {
+                @if (saveError()) {
+                    <p class="error-message" role="alert">{{ saveError() }}</p>
                 }
-            </mat-form-field>
 
-            <mat-form-field appearance="outline">
-                <mat-label>Email Address</mat-label>
-                <input matInput type="email" formControlName="email">
+                <form [formGroup]="customerForm" (ngSubmit)="onSubmit()" class="form-layout">
 
-                @if (customerForm.controls.email.hasError('required')) {
-                    <mat-error>Email address is required.</mat-error>
-                } @else if (customerForm.controls.email.hasError('email')) {
-                    <mat-error>Enter a valid email address.</mat-error>
-                } @else if (customerForm.controls.email.hasError('blank')) {
-                    <mat-error>Email cannot contain only spaces.</mat-error>
-                }
-            </mat-form-field>
+                    <mat-form-field appearance="outline">
+                        <mat-label>Customer Name</mat-label>
+                        <input matInput type="text" formControlName="name">
 
-            <mat-form-field appearance="outline">
-                <mat-label>Phone Number</mat-label>
-                <input matInput type="tel" formControlName="phone">
+                        @if (customerForm.controls.name.hasError('required')) {
+                            <mat-error>Name is required.</mat-error>
+                        } @else if (customerForm.controls.name.hasError('minlength')) {
+                            <mat-error>Name must contain at least 2 characters.</mat-error>
+                        } @else if (customerForm.controls.name.hasError('maxlength')) {
+                            <mat-error>Name cannot exceed 100 characters.</mat-error>
+                        } @else if (customerForm.controls.name.hasError('blank')) {
+                            <mat-error>Name cannot contain only spaces.</mat-error>
+                        }
+                    </mat-form-field>
 
-                @if (customerForm.controls.phone.hasError('required')) {
-                    <mat-error>Phone number is required.</mat-error>
-                } @else if (customerForm.controls.phone.hasError('blank')) {
-                    <mat-error>Phone number cannot contain only spaces.</mat-error>
-                }
-            </mat-form-field>
+                    <mat-form-field appearance="outline">
+                        <mat-label>Email Address</mat-label>
+                        <input matInput type="email" formControlName="email">
 
-            <mat-form-field appearance="outline">
-                <mat-label>Address</mat-label>
-                <textarea matInput rows="3" formControlName="address"></textarea>
+                        @if (customerForm.controls.email.hasError('required')) {
+                            <mat-error>Email address is required.</mat-error>
+                        } @else if (customerForm.controls.email.hasError('email')) {
+                            <mat-error>Enter a valid email address.</mat-error>
+                        } @else if (customerForm.controls.email.hasError('blank')) {
+                            <mat-error>Email cannot contain only spaces.</mat-error>
+                        }
+                    </mat-form-field>
 
-                @if (customerForm.controls.address.hasError('required')) {
-                    <mat-error>Address is required.</mat-error>
-                } @else if (customerForm.controls.address.hasError('blank')) {
-                    <mat-error>Address cannot contain only spaces.</mat-error>
-                }
-            </mat-form-field>
+                    <mat-form-field appearance="outline">
+                        <mat-label>Phone Number</mat-label>
+                        <input matInput type="tel" formControlName="phone">
 
-            <div class="button-group">
-                <button matButton="filled" type="submit" [disabled]="customerForm.invalid || saving() || loading()">
-                    {{ saving() ? 'Saving...' : customerId ? 'Update Customer' : 'Add Customer' }}
-                </button>
+                        @if (customerForm.controls.phone.hasError('required')) {
+                            <mat-error>Phone number is required.</mat-error>
+                        } @else if (customerForm.controls.phone.hasError('blank')) {
+                            <mat-error>Phone number cannot contain only spaces.</mat-error>
+                        }
+                    </mat-form-field>
 
-                <a matButton="outlined" routerLink="/customers">
-                    Cancel
-                </a>
-            </div>
+                    <mat-form-field appearance="outline">
+                        <mat-label>Address</mat-label>
+                        <textarea matInput rows="3" formControlName="address"></textarea>
 
-        </form>
-    </mat-card-content>
-</mat-card>
+                        @if (customerForm.controls.address.hasError('required')) {
+                            <mat-error>Address is required.</mat-error>
+                        } @else if (customerForm.controls.address.hasError('blank')) {
+                            <mat-error>Address cannot contain only spaces.</mat-error>
+                        }
+                    </mat-form-field>
+
+                    <!-- Form submission and cancellation actions -->
+                    <div class="form-actions">
+                        <button matButton="filled" type="submit" [disabled]="customerForm.invalid || saving() || loading()">
+                            {{ saving() ? 'Saving...' : customerId ? 'Update Customer' : 'Add Customer' }}
+                        </button>
+
+                        <a matButton="outlined" routerLink="/customers">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            }
+
+            @if (saving()) {
+                <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+            }
+        </mat-card-content>
+    </mat-card>
 </div>

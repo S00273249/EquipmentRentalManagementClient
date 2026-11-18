@@ -1,6 +1,7 @@
 <div class="page-container">
-    <div class="page-header">
-        <div>
+    <!-- Page heading and primary action -->
+    <div class="inventory-header">
+        <div class="page-heading">
             <h1>Maintenance Records</h1>
             <p>View and manage equipment maintenance records.</p>
         </div>
@@ -11,14 +12,14 @@
     </div>
 
     @if (errorMessage) {
-        <p class="error-message">{{ errorMessage }}</p>
+        <p class="error-message" role="alert">{{ errorMessage }}</p>
     }
 
     @if (maintenance$ | async; as maintenanceRecords) {
         @if (maintenanceRecords.length > 0) {
-            <div class="maintenance-list">
+            <div class="record-grid">
                 @for (record of maintenanceRecords; track record._id) {
-                    <div class="maintenance-card">
+                    <div class="record-card">
                         <div class="maintenance-details">
                             <h2>{{ record.maintenanceType }}</h2>
                             <p><strong>Equipment:</strong> {{ record.equipmentName }}</p>
@@ -29,7 +30,7 @@
                             <p><strong>Notes:</strong> {{ record.notes }}</p>
                         </div>
 
-                        <div class="maintenance-actions">
+                        <div class="record-actions">
                             <a matButton="outlined" [routerLink]="['/maintenance', record._id, 'edit']">
                                 Edit
                             </a>
@@ -42,7 +43,13 @@
                 }
             </div>
         } @else {
-            <p class="empty-message">No maintenance records found.</p>
+            <div class="empty-message">
+                <h2>No maintenance records found</h2>
+                <p>There are currently no maintenance records available.</p>
+                <a matButton="filled" routerLink="/maintenance/new">
+                    Add Your First Maintenance Record
+                </a>
+            </div>
         }
     }
 </div>

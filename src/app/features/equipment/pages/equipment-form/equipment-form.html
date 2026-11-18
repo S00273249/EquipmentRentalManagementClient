@@ -16,7 +16,7 @@
                 <mat-progress-bar mode="indeterminate" />
                 <p>Loading equipment details...</p>
             } @else {
-                <form [formGroup]="equipmentForm" (ngSubmit)="onSubmit()" class="equipment-form">
+                <form [formGroup]="equipmentForm" (ngSubmit)="onSubmit()" class="form-layout">
 
                     @if (saving()) {
                         <mat-progress-bar mode="buffer" />

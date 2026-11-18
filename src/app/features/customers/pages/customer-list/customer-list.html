@@ -18,9 +18,9 @@
         @if (customers$ | async; as customers) {
             @if (customers.length > 0) {
                 <!-- Display customer records in a responsive card grid -->
-                <div class="customer-list">
+                <div class="record-grid">
                     @for (customer of customers; track customer._id) {
-                        <div class="customer-card">
+                        <div class="record-card">
                             <div class="customer-card-header">
                                 <h2>{{ customer.name }}</h2>
                             </div>
@@ -32,7 +32,7 @@
                             </div>
 
                             <!-- Actions for the individual customer record -->
-                            <div class="customer-actions">
+                            <div class="record-actions">
                                 <a matButton="outlined" [routerLink]="['/customers', customer._id, 'edit']">
                                     Edit
                                 </a>

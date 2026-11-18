@@ -2,11 +2,13 @@ import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
+import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { Maintenance, CreateMaintenanceDto } from '../../models/maintenance';
 import { MaintenanceService } from '../../services/maintenance';
 import { EquipmentService } from '../../../equipment/services/equipment';
@@ -20,11 +22,13 @@ import { dateBoundsValidator } from '../../../../shared/validators/date-bounds.v
     imports: [
         ReactiveFormsModule,
         RouterLink,
+        MatCardModule,
         MatFormFieldModule,
         MatInputModule,
         MatSelectModule,
         MatButtonModule,
-        MatSnackBarModule
+        MatSnackBarModule,
+        MatProgressBarModule
     ],
     templateUrl: './maintenance-form.html',
     styleUrl: './maintenance-form.scss'
@@ -58,8 +62,11 @@ export class MaintenanceForm implements OnInit {
     // Store equipment retrieved from the backend
     equipment: Equipment[] = [];
 
-    // Track whether the form data is currently being loaded or saved
+    // Track whether the form data is currently being loaded
     isLoading = false;
+
+    // Track whether the maintenance record is currently being saved
+    isSaving = false;
 
     // Store an error message if loading or saving fails
     errorMessage = '';
@@ -184,8 +191,8 @@ export class MaintenanceForm implements OnInit {
     // Handle maintenance form submission
     onSubmit(): void {
 
-        // Prevent submission if the form is invalid
-        if (this.maintenanceForm.invalid) {
+        // Prevent submission if the form is invalid or already being saved
+        if (this.maintenanceForm.invalid || this.isSaving) {
             this.maintenanceForm.markAllAsTouched();
             return;
         }
@@ -195,7 +202,7 @@ export class MaintenanceForm implements OnInit {
 
         // Clear previous errors and indicate that the maintenance record is being saved
         this.errorMessage = '';
-        this.isLoading = true;
+        this.isSaving = true;
 
         // Create the DTO containing the information required by the API
         const maintenanceData: CreateMaintenanceDto = {
@@ -232,7 +239,7 @@ export class MaintenanceForm implements OnInit {
                 // Display the error returned by the backend, or a fallback message
                 this.errorMessage = error.error?.message ?? 'Unable to save maintenance record. Please try again.';
 
-                this.isLoading = false;
+                this.isSaving = false;
                 this.cdr.markForCheck();
             }
         });

@@ -1,43 +1,4 @@
-/* Arrange the page heading and primary action horizontally */
-.inventory-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-    flex-wrap: wrap;
-
-    /* Keep the heading from creating unnecessary spacing */
-    h1 {
-        margin: 0;
-    }
-}
-
-/* Add some spacing below the page title */
-.page-heading p {
-    margin: 0.5rem 0 0;
-    color: var(--mat-sys-on-surface-variant);
-}
-
-/* Display booking cards in a responsive grid */
-.booking-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
-    gap: 1.25rem;
-}
-
-/* Give each booking record its own card */
-.booking-card {
-    display: flex;
-    flex-direction: column;
-    padding: 1.25rem;
-    border: 1px solid var(--mat-sys-outline-variant);
-    border-radius: 12px;
-    background-color: var(--mat-sys-surface-container-low);
-    min-width: 0;
-}
-
-/* Stack the customer name and status consistently */
+/* Keep the booking name and status badge vertically aligned */
 .booking-card-header {
     display: flex;
     flex-direction: column;
@@ -52,103 +13,53 @@
     }
 }
 
-/* Display booking status as a small coloured label */
+/* Give booking statuses a consistent badge appearance */
 .booking-status {
     display: inline-block;
     padding: 0.3rem 0.65rem;
     border-radius: 6px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    white-space: nowrap;
+    font-size: 0.8rem;
+    font-weight: 500;
 }
 
-/* Booking is awaiting confirmation */
+/* Distinguish pending bookings */
 .booking-status-pending {
-    background-color: #fff3cd;
-    color: #856404;
+    background-color: var(--mat-sys-secondary-container);
+    color: var(--mat-sys-on-secondary-container);
 }
 
-/* Booking has been approved */
+/* Distinguish confirmed bookings */
 .booking-status-confirmed {
-    background-color: #dbeafe;
-    color: #1e40af;
+    background-color: var(--mat-sys-primary-container);
+    color: var(--mat-sys-on-primary-container);
 }
 
-/* Equipment is currently rented */
+/* Distinguish active bookings */
 .booking-status-active {
-    background-color: #dcfce7;
-    color: #166534;
+    background-color: var(--mat-sys-tertiary-container);
+    color: var(--mat-sys-on-tertiary-container);
 }
 
-/* Booking has been completed */
+/* Distinguish completed bookings */
 .booking-status-completed {
-    background-color: #e5e7eb;
-    color: #374151;
+    background-color: var(--mat-sys-surface-container-high);
+    color: var(--mat-sys-on-surface);
 }
 
-/* Booking has been cancelled */
+/* Highlight cancelled bookings */
 .booking-status-cancelled {
-    background-color: #fee2e2;
-    color: #991b1b;
+    background-color: var(--mat-sys-error-container);
+    color: var(--mat-sys-on-error-container);
 }
 
-/* Group the booking's dates, equipment and pricing details */
+/* Arrange the booking's date, customer and equipment details */
 .booking-details {
     flex: 1;
+    min-width: 0;
 
     p {
         margin: 0.6rem 0;
         line-height: 1.5;
         overflow-wrap: anywhere;
-    }
-}
-
-/* Keep Edit and Delete buttons together */
-.booking-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-top: 1rem;
-    flex-wrap: wrap;
-}
-
-/* Distinguish destructive actions from normal actions */
-.button-danger {
-    color: var(--mat-sys-error);
-}
-
-/* Display a message when there are no booking records */
-.empty-message {
-    padding: 2rem;
-    text-align: center;
-    border: 1px dashed var(--mat-sys-outline-variant);
-    border-radius: 12px;
-
-    h2 {
-        margin-top: 0;
-    }
-
-    p {
-        color: var(--mat-sys-on-surface-variant);
-    }
-}
-
-/* Use a single column on smaller screens */
-@media (max-width: 600px) {
-    .inventory-header {
-        align-items: flex-start;
-        flex-direction: column;
-    }
-
-    .inventory-header a {
-        width: 100%;
-    }
-
-    .booking-list {
-        grid-template-columns: 1fr;
-    }
-
-    .booking-card {
-        padding: 1rem;
     }
 }

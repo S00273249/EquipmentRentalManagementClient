@@ -1,120 +1,148 @@
 <div class="page-container">
-    <div class="form-container">
-        <div class="form-header">
-            <h1>{{ maintenanceId ? 'Edit Maintenance Record' : 'Add Maintenance Record' }}</h1>
-            <p>Enter the details of the maintenance record.</p>
-        </div>
+    <mat-card class="form-card">
+        <!-- Keep the form heading and description inside the card -->
+        <mat-card-header class="form-card-header">
+            <mat-card-title>
+                {{ maintenanceId ? 'Edit Maintenance Record' : 'Add Maintenance Record' }}
+            </mat-card-title>
 
-        @if (isLoading) {
-            <p>Loading...</p>
-        } @else {
-            @if (errorMessage) {
-                <p class="error-message">{{ errorMessage }}</p>
-            }
+            <mat-card-subtitle>
+                Enter the details of the maintenance record.
+            </mat-card-subtitle>
+        </mat-card-header>
 
-            <form [formGroup]="maintenanceForm" (ngSubmit)="onSubmit()">
-
-                <mat-form-field appearance="outline">
-                    <mat-label>Equipment</mat-label>
-                    <mat-select formControlName="equipmentId">
-                        @for (item of equipment; track item._id) {
-                            <mat-option [value]="item._id">{{ item.name }}</mat-option>
-                        }
-                    </mat-select>
-                    @if (maintenanceForm.get('equipmentId')?.hasError('required') && maintenanceForm.get('equipmentId')?.touched) {
-                        <mat-error>Please select equipment.</mat-error>
-                    }
-                </mat-form-field>
-
-                <mat-form-field appearance="outline">
-                    <mat-label>Maintenance Type</mat-label>
-                    <mat-select formControlName="maintenanceType">
-                        @for (type of maintenanceTypes; track type) {
-                            <mat-option [value]="type">{{ type }}</mat-option>
-                        }
-                    </mat-select>
-                    @if (maintenanceForm.get('maintenanceType')?.hasError('required') && maintenanceForm.get('maintenanceType')?.touched) {
-                        <mat-error>Please select a maintenance type.</mat-error>
-                    }
-                    @if (maintenanceForm.get('maintenanceType')?.hasError('blank') && maintenanceForm.get('maintenanceType')?.touched) {
-                        <mat-error>Maintenance type cannot contain only whitespace.</mat-error>
-                    }
-                </mat-form-field>
-
-                <mat-form-field appearance="outline">
-                    <mat-label>Description</mat-label>
-                    <input matInput formControlName="description">
-                    @if (maintenanceForm.get('description')?.hasError('required') && maintenanceForm.get('description')?.touched) {
-                        <mat-error>Description is required.</mat-error>
-                    }
-                    @if (maintenanceForm.get('description')?.hasError('minlength') && maintenanceForm.get('description')?.touched) {
-                        <mat-error>Description must contain at least 2 characters.</mat-error>
-                    }
-                    @if (maintenanceForm.get('description')?.hasError('blank') && maintenanceForm.get('description')?.touched) {
-                        <mat-error>Description cannot contain only whitespace.</mat-error>
-                    }
-                </mat-form-field>
-
-                <div class="date-cost-fields">
-                    <mat-form-field appearance="outline">
-                        <mat-label>Start Date</mat-label>
-                        <input matInput type="date" formControlName="startDate" [min]="minDate" [max]="maxDate">
-                        @if (maintenanceForm.get('startDate')?.hasError('required') && maintenanceForm.get('startDate')?.touched) {
-                            <mat-error>Start date is required.</mat-error>
-                        }
-                        @if (maintenanceForm.get('startDate')?.hasError('dateOutOfBounds') && maintenanceForm.get('startDate')?.touched) {
-                            <mat-error>Start date must be within the permitted date range.</mat-error>
-                        }
-                    </mat-form-field>
-
-                    <mat-form-field appearance="outline">
-                        <mat-label>End Date</mat-label>
-                        <input matInput type="date" formControlName="endDate" [min]="minDate" [max]="maxDate">
-                        @if (maintenanceForm.get('endDate')?.hasError('required') && maintenanceForm.get('endDate')?.touched) {
-                            <mat-error>End date is required.</mat-error>
-                        }
-                        @if (maintenanceForm.get('endDate')?.hasError('dateOutOfBounds') && maintenanceForm.get('endDate')?.touched) {
-                            <mat-error>End date must be within the permitted date range.</mat-error>
-                        }
-                    </mat-form-field>
-
-                    <mat-form-field appearance="outline">
-                        <mat-label>Cost (€)</mat-label>
-                        <input matInput type="number" min="0" step="0.01" formControlName="cost">
-                        @if (maintenanceForm.get('cost')?.hasError('required') && maintenanceForm.get('cost')?.touched) {
-                            <mat-error>Cost is required.</mat-error>
-                        }
-                        @if (maintenanceForm.get('cost')?.hasError('min') && maintenanceForm.get('cost')?.touched) {
-                            <mat-error>Cost cannot be negative.</mat-error>
-                        }
-                    </mat-form-field>
-                </div>
-
-                @if (maintenanceForm.hasError('invalidDateRange') && (maintenanceForm.get('startDate')?.touched || maintenanceForm.get('endDate')?.touched)) {
-                    <p class="error-message">End date must be after the start date.</p>
+        <mat-card-content>
+            @if (isLoading) {
+                <p>Loading maintenance record...</p>
+            } @else {
+                @if (errorMessage) {
+                    <p class="error-message" role="alert">{{ errorMessage }}</p>
                 }
 
-                <mat-form-field appearance="outline">
-                    <mat-label>Notes</mat-label>
-                    <textarea matInput rows="2" formControlName="notes"></textarea>
-                    @if (maintenanceForm.get('notes')?.hasError('required') && maintenanceForm.get('notes')?.touched) {
-                        <mat-error>Notes are required.</mat-error>
-                    }
-                    @if (maintenanceForm.get('notes')?.hasError('blank') && maintenanceForm.get('notes')?.touched) {
-                        <mat-error>Notes cannot contain only whitespace.</mat-error>
-                    }
-                </mat-form-field>
+                <form [formGroup]="maintenanceForm" (ngSubmit)="onSubmit()" class="form-layout">
 
-                <div class="form-actions">
-                    <button matButton="filled" type="submit" [disabled]="maintenanceForm.invalid || isLoading">
-                        {{ maintenanceId ? 'Update Maintenance Record' : 'Add Maintenance Record' }}
-                    </button>
+                    <mat-form-field appearance="outline">
+                        <mat-label>Equipment</mat-label>
+                        <mat-select formControlName="equipmentId">
+                            @for (item of equipment; track item._id) {
+                                <mat-option [value]="item._id">{{ item.name }}</mat-option>
+                            }
+                        </mat-select>
 
-                    <a matButton="outlined" routerLink="/maintenance">
-                        Cancel
-                    </a>
-                </div>
-            </form>
-        }
-    </div>
+                        @if (maintenanceForm.get('equipmentId')?.hasError('required') && maintenanceForm.get('equipmentId')?.touched) {
+                            <mat-error>Please select equipment.</mat-error>
+                        }
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                        <mat-label>Maintenance Type</mat-label>
+                        <mat-select formControlName="maintenanceType">
+                            @for (type of maintenanceTypes; track type) {
+                                <mat-option [value]="type">{{ type }}</mat-option>
+                            }
+                        </mat-select>
+
+                        @if (maintenanceForm.get('maintenanceType')?.hasError('required') && maintenanceForm.get('maintenanceType')?.touched) {
+                            <mat-error>Please select a maintenance type.</mat-error>
+                        }
+
+                        @if (maintenanceForm.get('maintenanceType')?.hasError('blank') && maintenanceForm.get('maintenanceType')?.touched) {
+                            <mat-error>Maintenance type cannot contain only whitespace.</mat-error>
+                        }
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                        <mat-label>Description</mat-label>
+                        <input matInput formControlName="description">
+
+                        @if (maintenanceForm.get('description')?.hasError('required') && maintenanceForm.get('description')?.touched) {
+                            <mat-error>Description is required.</mat-error>
+                        }
+
+                        @if (maintenanceForm.get('description')?.hasError('minlength') && maintenanceForm.get('description')?.touched) {
+                            <mat-error>Description must contain at least 2 characters.</mat-error>
+                        }
+
+                        @if (maintenanceForm.get('description')?.hasError('blank') && maintenanceForm.get('description')?.touched) {
+                            <mat-error>Description cannot contain only whitespace.</mat-error>
+                        }
+                    </mat-form-field>
+
+                    <!-- Display the dates and cost alongside each other -->
+                    <div class="date-cost-fields">
+                        <mat-form-field appearance="outline">
+                            <mat-label>Start Date</mat-label>
+                            <input matInput type="date" formControlName="startDate" [min]="minDate" [max]="maxDate">
+
+                            @if (maintenanceForm.get('startDate')?.hasError('required') && maintenanceForm.get('startDate')?.touched) {
+                                <mat-error>Start date is required.</mat-error>
+                            }
+
+                            @if (maintenanceForm.get('startDate')?.hasError('dateOutOfBounds') && maintenanceForm.get('startDate')?.touched) {
+                                <mat-error>Start date must be within the permitted date range.</mat-error>
+                            }
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline">
+                            <mat-label>End Date</mat-label>
+                            <input matInput type="date" formControlName="endDate" [min]="minDate" [max]="maxDate">
+
+                            @if (maintenanceForm.get('endDate')?.hasError('required') && maintenanceForm.get('endDate')?.touched) {
+                                <mat-error>End date is required.</mat-error>
+                            }
+
+                            @if (maintenanceForm.get('endDate')?.hasError('dateOutOfBounds') && maintenanceForm.get('endDate')?.touched) {
+                                <mat-error>End date must be within the permitted date range.</mat-error>
+                            }
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline">
+                            <mat-label>Cost (€)</mat-label>
+                            <input matInput type="number" min="0" step="0.01" formControlName="cost">
+
+                            @if (maintenanceForm.get('cost')?.hasError('required') && maintenanceForm.get('cost')?.touched) {
+                                <mat-error>Cost is required.</mat-error>
+                            }
+
+                            @if (maintenanceForm.get('cost')?.hasError('min') && maintenanceForm.get('cost')?.touched) {
+                                <mat-error>Cost cannot be negative.</mat-error>
+                            }
+                        </mat-form-field>
+                    </div>
+
+                    @if (maintenanceForm.hasError('invalidDateRange') && (maintenanceForm.get('startDate')?.touched || maintenanceForm.get('endDate')?.touched)) {
+                        <p class="error-message" role="alert">End date must be after the start date.</p>
+                    }
+
+                    <mat-form-field appearance="outline">
+                        <mat-label>Notes</mat-label>
+                        <textarea matInput rows="2" formControlName="notes"></textarea>
+
+                        @if (maintenanceForm.get('notes')?.hasError('required') && maintenanceForm.get('notes')?.touched) {
+                            <mat-error>Notes are required.</mat-error>
+                        }
+
+                        @if (maintenanceForm.get('notes')?.hasError('blank') && maintenanceForm.get('notes')?.touched) {
+                            <mat-error>Notes cannot contain only whitespace.</mat-error>
+                        }
+                    </mat-form-field>
+
+                    @if (isSaving) {
+                        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+                    }
+
+                    <!-- Form submission and cancellation actions -->
+                    <div class="form-actions">
+                        <button matButton="filled" type="submit" [disabled]="maintenanceForm.invalid || isLoading || isSaving">
+                            {{ isSaving ? 'Saving...' : (maintenanceId ? 'Update Maintenance Record' : 'Add Maintenance Record') }}
+                        </button>
+
+                        <a matButton="outlined" routerLink="/maintenance">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            }
+        </mat-card-content>
+    </mat-card>
 </div>

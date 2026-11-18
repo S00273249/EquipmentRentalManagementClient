@@ -18,16 +18,14 @@
         @if (bookings$ | async; as bookings) {
             @if (bookings.length > 0) {
                 <!-- Display booking records in a responsive card grid -->
-                <div class="booking-list">
+                <div class="record-grid">
                     @for (booking of bookings; track booking._id) {
-                        <div class="booking-card">
+                        <div class="record-card">
                             <div class="booking-card-header">
-                                <div class="booking-card-header">
-                                    <h2>{{ booking.customerName }}</h2>
-                                    <span class="booking-status" [class]="'booking-status booking-status-' + booking.status.toLowerCase()">
-                                        {{ booking.status }}
-                                    </span>
-                                </div>
+                                <h2>{{ booking.customerName }}</h2>
+                                <span [class]="'booking-status booking-status-' + booking.status.toLowerCase()">
+                                    {{ booking.status }}
+                                </span>
                             </div>
 
                             <div class="booking-details">
@@ -39,7 +37,7 @@
                             </div>
 
                             <!-- Actions for the individual booking record -->
-                            <div class="booking-actions">
+                            <div class="record-actions">
                                 <a matButton="outlined" [routerLink]="['/bookings', booking._id, 'edit']">
                                     Edit
                                 </a>
