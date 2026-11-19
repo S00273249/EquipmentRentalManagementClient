@@ -25,6 +25,7 @@
                                 <h2>{{ customer.name }}</h2>
                             </div>
 
+                            <!-- Customer contact details -->
                             <div class="customer-details">
                                 <p><strong>Email:</strong> {{ customer.email }}</p>
                                 <p><strong>Phone:</strong> {{ customer.phone }}</p>
@@ -33,11 +34,17 @@
 
                             <!-- Actions for the individual customer record -->
                             <div class="record-actions">
-                                <a matButton="outlined" [routerLink]="['/customers', customer._id, 'edit']">
+                                <a matButton="outlined"
+                                   [routerLink]="['/customers', customer._id, 'edit']"
+                                   aria-label="Edit customer {{ customer.name }}">
                                     Edit
                                 </a>
 
-                                <button matButton="outlined" class="button-danger" type="button" (click)="deleteCustomer(customer._id, customer.name)">
+                                <button matButton="outlined"
+                                        class="button-danger"
+                                        type="button"
+                                        aria-label="Delete customer {{ customer.name }}"
+                                        (click)="deleteCustomer(customer._id, customer.name)">
                                     Delete
                                 </button>
                             </div>
@@ -45,6 +52,7 @@
                     }
                 </div>
             } @else {
+                <!-- Display a message when no customer records exist -->
                 <div class="empty-message">
                     <h2>No customers found</h2>
                     <p>There are currently no customer records available.</p>
@@ -54,7 +62,8 @@
                 </div>
             }
         } @else {
-            <p>Loading customers...</p>
+            <!-- Display a loading message while customers are being retrieved -->
+            <p role="status">Loading customers...</p>
         }
     }
 </div>

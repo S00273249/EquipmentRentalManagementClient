@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -35,29 +35,14 @@ import { dateBoundsValidator } from '../../../../shared/validators/date-bounds.v
 })
 export class BookingForm implements OnInit {
 
-    // Inject FormBuilder to create and manage the reactive form
+    // Inject services and utilities required by the component
     private fb = inject(FormBuilder);
-
-    // Inject ActivatedRoute to retrieve the booking ID from the URL
     private route = inject(ActivatedRoute);
-
-    // Inject Router to navigate after saving
     private router = inject(Router);
-
-    // Inject BookingService to communicate with the backend
     private bookingService = inject(BookingService);
-
-    // Inject CustomerService to retrieve customers for the dropdown
     private customerService = inject(CustomerService);
-
-    // Inject EquipmentService to retrieve equipment for the dropdown
     private equipmentService = inject(EquipmentService);
-
-    // Inject MatSnackBar to display success messages
     private snackBar = inject(MatSnackBar);
-
-    // Inject ChangeDetectorRef to manually trigger change detection when asynchronous operations update component properties
-    private cdr = inject(ChangeDetectorRef);
 
     // Store the booking ID when editing an existing booking
     bookingId: string | null = null;
@@ -66,11 +51,10 @@ export class BookingForm implements OnInit {
     customers: Customer[] = [];
     equipment: Equipment[] = [];
 
-    // Track whether the form data is currently being loaded or saved
-    isLoading = false;
-
-    // Store an error message if loading or saving fails
-    errorMessage = '';
+    // Track loading, saving and error states using signals
+    loading = signal(false);
+    saving = signal(false);
+    saveError = signal<string | null>(null);
 
     // Define the available booking statuses for the dropdown
     statuses: BookingStatus[] = [
@@ -102,16 +86,15 @@ export class BookingForm implements OnInit {
     }
 
     // Create the booking form and define its validation rules
-    bookingForm = this.fb.group({
+    bookingForm = this.fb.nonNullable.group({
         customerId: ['', Validators.required],
         equipmentId: ['', Validators.required],
         startDate: ['', [Validators.required, dateBoundsValidator(this.minDate, this.maxDate)]],
         endDate: ['', [Validators.required, dateBoundsValidator(this.minDate, this.maxDate)]],
-        status: ['Pending' as BookingStatus, Validators.required]
+        status: this.fb.nonNullable.control<BookingStatus>('Pending', Validators.required)
     }, {
-
-        // Apply a custom form-group validator to compare the start and end dates.
-        // This allows validation to depend on the values of two separate form controls.
+        // Validate the relationship between the start and end dates
+        // A form-group validator can compare values from multiple form controls
         validators: [dateRangeValidator]
     });
 
@@ -125,10 +108,11 @@ export class BookingForm implements OnInit {
 
     // Retrieve customers and equipment from the backend
     loadFormData(): void {
-        this.isLoading = true;
+        this.loading.set(true);
+        this.saveError.set(null);
 
-        // Use forkJoin to execute both API requests in parallel and wait until both have completed.
-        // The results are then returned together, allowing the form to be populated with both collections.
+        // Run both API requests in parallel and wait until both have completed
+        // forkJoin emits one combined result containing the response from each request
         forkJoin({
             customers: this.customerService.getCustomers(),
             equipment: this.equipmentService.getEquipment()
@@ -141,19 +125,16 @@ export class BookingForm implements OnInit {
                 if (this.bookingId) {
                     this.loadBooking();
                 } else {
-
                     // Finish loading when creating a new booking
-                    this.isLoading = false;
-
-                    // Mark the component for change detection so Angular updates the view with the latest values
-                    this.cdr.markForCheck();
+                    this.loading.set(false);
                 }
             },
             error: (error: HttpErrorResponse) => {
                 console.error('Error loading booking form data:', error);
-                this.errorMessage = 'Unable to load customers and equipment.';
-                this.isLoading = false;
-                this.cdr.markForCheck();
+                this.saveError.set(
+                    error.error?.message ?? 'Unable to load customers and equipment. Please try again.'
+                );
+                this.loading.set(false);
             }
         });
     }
@@ -166,7 +147,6 @@ export class BookingForm implements OnInit {
 
         this.bookingService.getBookingById(this.bookingId).subscribe({
             next: booking => {
-
                 // Populate the form with the existing booking details
                 this.bookingForm.patchValue({
                     customerId: booking.customerId,
@@ -176,24 +156,26 @@ export class BookingForm implements OnInit {
                     status: booking.status
                 });
 
-                this.isLoading = false;
-
-                // Mark the component for change detection so Angular updates the view with the latest values
-                this.cdr.markForCheck();
+                this.loading.set(false);
             },
             error: (error: HttpErrorResponse) => {
                 console.error('Error loading booking:', error);
-                this.errorMessage = 'Unable to load this booking.';
-                this.isLoading = false;
-                this.cdr.markForCheck();
+                this.saveError.set(
+                    error.error?.message ?? 'Unable to load this booking. Please try again.'
+                );
+                this.loading.set(false);
             }
         });
     }
 
-    // Handle booking form submission
+    // Validate and submit the booking form
     onSubmit(): void {
+        // Prevent submission while the form is loading or being saved
+        if (this.loading() || this.saving()) {
+            return;
+        }
 
-        // Prevent submission if the form is invalid
+        // Display validation messages if the form is invalid
         if (this.bookingForm.invalid) {
             this.bookingForm.markAllAsTouched();
             return;
@@ -203,16 +185,16 @@ export class BookingForm implements OnInit {
         const formValue = this.bookingForm.getRawValue();
 
         // Clear previous errors and indicate that the booking is being saved
-        this.errorMessage = '';
-        this.isLoading = true;
+        this.saveError.set(null);
+        this.saving.set(true);
 
-        // Create the booking DTO containing the information required by the API
+        // Create the DTO containing the information required by the API
         const bookingData: CreateBookingDto = {
-            customerId: formValue.customerId!,
-            equipmentId: formValue.equipmentId!,
-            startDate: formValue.startDate!,
-            endDate: formValue.endDate!,
-            status: formValue.status!
+            customerId: formValue.customerId,
+            equipmentId: formValue.equipmentId,
+            startDate: formValue.startDate,
+            endDate: formValue.endDate,
+            status: formValue.status
         };
 
         // Choose the appropriate API operation depending on whether a booking ID exists
@@ -222,7 +204,6 @@ export class BookingForm implements OnInit {
 
         request.subscribe({
             next: () => {
-
                 // Display a confirmation message after successfully saving the booking
                 const message = this.bookingId
                     ? 'Booking updated successfully'
@@ -237,10 +218,11 @@ export class BookingForm implements OnInit {
                 console.error('Error saving booking:', error);
 
                 // Display the error returned by the backend, or a fallback message
-                this.errorMessage = error.error?.message ?? 'Unable to save booking. Please try again.';
+                this.saveError.set(
+                    error.error?.message ?? 'Unable to save booking. Please try again.'
+                );
 
-                this.isLoading = false;
-                this.cdr.markForCheck();
+                this.saving.set(false);
             }
         });
     }

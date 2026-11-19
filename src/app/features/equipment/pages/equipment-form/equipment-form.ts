@@ -1,4 +1,5 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -27,31 +28,20 @@ import { notBlank } from '../../../../shared/validators/not-blank.validator';
 })
 export class EquipmentForm implements OnInit {
 
-    // Inject FormBuilder to create and manage the reactive form
+    // Inject services and utilities required by the component
     private formBuilder = inject(FormBuilder);
-
-    // Inject EquipmentService to communicate with the backend
     private equipmentService = inject(EquipmentService);
-
-    // Inject ActivatedRoute to retrieve the equipment ID from the URL
     private route = inject(ActivatedRoute);
-
-    // Inject Router to navigate after saving
     private router = inject(Router);
-
-    // Inject MatSnackBar to display success messages
     private snackBar = inject(MatSnackBar);
 
     // Store the equipment ID when editing an existing record
     equipmentId: string | null = null;
 
-    // Track whether the equipment is currently being loaded
+    // Track loading and saving states using signals
+    // Signals notify Angular when their values change so the view can update
     loading = signal(false);
-
-    // Track whether the equipment is currently being saved
     saving = signal(false);
-
-    // Store an error message if loading or saving fails
     saveError = signal<string | null>(null);
 
     // Create the equipment form and define its validation rules
@@ -82,7 +72,6 @@ export class EquipmentForm implements OnInit {
 
     // Check whether the page is being used to edit existing equipment
     ngOnInit(): void {
-
         this.equipmentId = this.route.snapshot.paramMap.get('id');
 
         // If there is no ID, the form is being used to create new equipment
@@ -95,7 +84,6 @@ export class EquipmentForm implements OnInit {
 
         this.equipmentService.getEquipmentById(this.equipmentId).subscribe({
             next: (equipment) => {
-
                 // Populate the form with the existing equipment details
                 this.equipmentForm.patchValue({
                     name: equipment.name,
@@ -108,19 +96,29 @@ export class EquipmentForm implements OnInit {
 
                 this.loading.set(false);
             },
-            error: (error: Error) => {
+            error: (error: HttpErrorResponse) => {
                 console.error('Error retrieving equipment:', error);
-                this.saveError.set('Unable to retrieve this equipment. Please try again.');
+                this.saveError.set(
+                    typeof error.error?.message === 'string'
+                        ? error.error.message
+                        : 'Unable to retrieve this equipment. Please try again.'
+                );
                 this.loading.set(false);
             }
         });
     }
 
-    // Handle form submission
+    // Validate and submit the equipment form
     onSubmit(): void {
 
-        // Prevent submission if the form is invalid or already being saved
-        if (this.equipmentForm.invalid || this.saving() || this.loading()) {
+        // Prevent submission while the form is loading or being saved
+        if (this.saving() || this.loading()) {
+            return;
+        }
+
+        // Display validation messages if the form is invalid
+        if (this.equipmentForm.invalid) {
+            this.equipmentForm.markAllAsTouched();
             return;
         }
 
@@ -165,9 +163,13 @@ export class EquipmentForm implements OnInit {
                 console.log('Equipment saved successfully:', response);
                 this.router.navigate(['/equipment']);
             },
-            error: (error: Error) => {
+            error: (error: HttpErrorResponse) => {
                 console.error('Error saving equipment:', error);
-                this.saveError.set(error.message);
+                this.saveError.set(
+                    typeof error.error?.message === 'string'
+                        ? error.error.message
+                        : 'Unable to save this equipment. Please try again.'
+                );
                 this.saving.set(false);
 
                 // Re-enable the form so the user can correct the information
@@ -175,5 +177,4 @@ export class EquipmentForm implements OnInit {
             }
         });
     }
-
 }

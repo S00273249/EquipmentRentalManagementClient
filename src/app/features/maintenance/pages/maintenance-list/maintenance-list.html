@@ -11,15 +11,18 @@
         </a>
     </div>
 
+    <!-- Display any errors returned while loading maintenance records -->
     @if (errorMessage) {
         <p class="error-message" role="alert">{{ errorMessage }}</p>
     }
 
     @if (maintenance$ | async; as maintenanceRecords) {
         @if (maintenanceRecords.length > 0) {
+            <!-- Display maintenance records in a responsive card grid -->
             <div class="record-grid">
                 @for (record of maintenanceRecords; track record._id) {
                     <div class="record-card">
+                        <!-- Maintenance record details -->
                         <div class="maintenance-details">
                             <h2>{{ record.maintenanceType }}</h2>
                             <p><strong>Equipment:</strong> {{ record.equipmentName }}</p>
@@ -30,12 +33,19 @@
                             <p><strong>Notes:</strong> {{ record.notes }}</p>
                         </div>
 
+                        <!-- Actions for the individual maintenance record -->
                         <div class="record-actions">
-                            <a matButton="outlined" [routerLink]="['/maintenance', record._id, 'edit']">
+                            <a matButton="outlined"
+                               [routerLink]="['/maintenance', record._id, 'edit']"
+                               aria-label="Edit maintenance record for {{ record.equipmentName }}">
                                 Edit
                             </a>
 
-                            <button matButton="outlined" class="button-danger" type="button" (click)="deleteMaintenanceRecord(record._id, record.equipmentName)">
+                            <button matButton="outlined"
+                                    class="button-danger"
+                                    type="button"
+                                    aria-label="Delete maintenance record for {{ record.equipmentName }}"
+                                    (click)="deleteMaintenanceRecord(record._id, record.equipmentName)">
                                 Delete
                             </button>
                         </div>
@@ -43,6 +53,7 @@
                 }
             </div>
         } @else {
+            <!-- Display a message when no maintenance records exist -->
             <div class="empty-message">
                 <h2>No maintenance records found</h2>
                 <p>There are currently no maintenance records available.</p>
@@ -51,5 +62,8 @@
                 </a>
             </div>
         }
+    } @else {
+        <!-- Display a loading message while maintenance records are being retrieved -->
+        <p role="status">Loading maintenance records...</p>
     }
 </div>

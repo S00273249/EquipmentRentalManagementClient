@@ -1,6 +1,6 @@
 <div class="page-container">
     <mat-card class="form-card">
-        <!-- Keep the form heading and description inside the card -->
+        <!-- Form heading and description -->
         <mat-card-header class="form-card-header">
             <mat-card-title>
                 {{ customerId ? 'Edit Customer' : 'Add Customer' }}
@@ -12,16 +12,19 @@
         </mat-card-header>
 
         <mat-card-content>
+            <!-- Display loading progress while retrieving customer details -->
             @if (loading()) {
-                <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-                <p>Loading customer details...</p>
+                <mat-progress-bar mode="indeterminate" aria-label="Loading customer details"></mat-progress-bar>
+                <p role="status">Loading customer details...</p>
             } @else {
+                <!-- Display any errors returned while saving the customer -->
                 @if (saveError()) {
                     <p class="error-message" role="alert">{{ saveError() }}</p>
                 }
 
                 <form [formGroup]="customerForm" (ngSubmit)="onSubmit()" class="form-layout">
 
+                    <!-- Customer name -->
                     <mat-form-field appearance="outline">
                         <mat-label>Customer Name</mat-label>
                         <input matInput type="text" formControlName="name">
@@ -37,6 +40,7 @@
                         }
                     </mat-form-field>
 
+                    <!-- Customer contact details -->
                     <mat-form-field appearance="outline">
                         <mat-label>Email Address</mat-label>
                         <input matInput type="email" formControlName="email">
@@ -61,6 +65,7 @@
                         }
                     </mat-form-field>
 
+                    <!-- Customer address -->
                     <mat-form-field appearance="outline">
                         <mat-label>Address</mat-label>
                         <textarea matInput rows="3" formControlName="address"></textarea>
@@ -85,8 +90,9 @@
                 </form>
             }
 
+            <!-- Display progress while saving the customer -->
             @if (saving()) {
-                <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+                <mat-progress-bar mode="indeterminate" aria-label="Saving customer"></mat-progress-bar>
             }
         </mat-card-content>
     </mat-card>

@@ -154,6 +154,9 @@ h3 {
     padding: 1.25rem;
     border: 1px solid var(--app-border);
     border-radius: 12px;
+
+    /* Override Angular Material's default elevated card surface colour */
+    --mat-card-elevated-container-color: var(--app-form-card);
     background-color: var(--app-form-card);
 }
 

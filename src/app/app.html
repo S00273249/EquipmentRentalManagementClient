@@ -1,3 +1,4 @@
+<!-- Main navigation for accessing each section of the application -->
 <nav class="main-navigation" aria-label="Main navigation">
     <a routerLink="/equipment" routerLinkActive="active" ariaCurrentWhenActive="page">Equipment</a>
     <a routerLink="/customers" routerLinkActive="active" ariaCurrentWhenActive="page">Customers</a>
@@ -5,4 +6,7 @@
     <a routerLink="/maintenance" routerLinkActive="active" ariaCurrentWhenActive="page">Maintenance</a>
 </nav>
 
-<router-outlet></router-outlet>
+<!-- Main content area where the component for the current route is displayed -->
+<main id="main-content" tabindex="-1">
+    <router-outlet></router-outlet>
+</main>

@@ -1,6 +1,6 @@
 <div class="page-container">
     <mat-card class="form-card">
-        <!-- Keep the form heading and description inside the card -->
+        <!-- Form heading and description -->
         <mat-card-header class="form-card-header">
             <mat-card-title>
                 {{ equipmentId ? 'Edit Equipment' : 'Create Equipment' }}
@@ -12,16 +12,19 @@
         </mat-card-header>
 
         <mat-card-content>
+            <!-- Display loading progress while retrieving equipment details -->
             @if (loading()) {
-                <mat-progress-bar mode="indeterminate" />
-                <p>Loading equipment details...</p>
+                <mat-progress-bar mode="indeterminate" aria-label="Loading equipment details" />
+                <p role="status">Loading equipment details...</p>
             } @else {
                 <form [formGroup]="equipmentForm" (ngSubmit)="onSubmit()" class="form-layout">
 
+                    <!-- Display progress while saving equipment -->
                     @if (saving()) {
-                        <mat-progress-bar mode="buffer" />
+                        <mat-progress-bar mode="indeterminate" aria-label="Saving equipment" />
                     }
 
+                    <!-- Equipment name -->
                     <mat-form-field appearance="outline">
                         <mat-label>Equipment Name</mat-label>
                         <input
@@ -42,6 +45,7 @@
                         }
                     </mat-form-field>
 
+                    <!-- Equipment description -->
                     <mat-form-field appearance="outline">
                         <mat-label>Description</mat-label>
                         <textarea
@@ -60,6 +64,7 @@
                         }
                     </mat-form-field>
 
+                    <!-- Equipment daily rental rate -->
                     <mat-form-field appearance="outline">
                         <mat-label>Daily Rate (€)</mat-label>
                         <input
@@ -78,7 +83,7 @@
                         }
                     </mat-form-field>
 
-                    <!-- Use consistent field containers for the equipment dropdowns -->
+                    <!-- Equipment category selection -->
                     <div class="form-field">
                         <label for="category">Category</label>
                         <select id="category" formControlName="category">
@@ -91,6 +96,7 @@
                         </select>
                     </div>
 
+                    <!-- Equipment availability status -->
                     <div class="form-field">
                         <label for="status">Status</label>
                         <select id="status" formControlName="status">
@@ -100,6 +106,7 @@
                         </select>
                     </div>
 
+                    <!-- Equipment condition selection -->
                     <div class="form-field">
                         <label for="condition">Condition</label>
                         <select id="condition" formControlName="condition">
@@ -110,6 +117,7 @@
                         </select>
                     </div>
 
+                    <!-- Display any errors returned while saving equipment -->
                     @if (saveError(); as message) {
                         <p class="error-message" role="alert">{{ message }}</p>
                     }

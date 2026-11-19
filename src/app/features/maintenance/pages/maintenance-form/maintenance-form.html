@@ -1,6 +1,6 @@
 <div class="page-container">
     <mat-card class="form-card">
-        <!-- Keep the form heading and description inside the card -->
+        <!-- Form heading and description -->
         <mat-card-header class="form-card-header">
             <mat-card-title>
                 {{ maintenanceId ? 'Edit Maintenance Record' : 'Add Maintenance Record' }}
@@ -12,15 +12,18 @@
         </mat-card-header>
 
         <mat-card-content>
-            @if (isLoading) {
-                <p>Loading maintenance record...</p>
+            <!-- Display a loading message while retrieving maintenance details -->
+            @if (loading()) {
+                <p role="status">Loading maintenance record...</p>
             } @else {
-                @if (errorMessage) {
-                    <p class="error-message" role="alert">{{ errorMessage }}</p>
+                <!-- Display any errors returned while loading or saving the record -->
+                @if (saveError()) {
+                    <p class="error-message" role="alert">{{ saveError() }}</p>
                 }
 
                 <form [formGroup]="maintenanceForm" (ngSubmit)="onSubmit()" class="form-layout">
 
+                    <!-- Equipment selection -->
                     <mat-form-field appearance="outline">
                         <mat-label>Equipment</mat-label>
                         <mat-select formControlName="equipmentId">
@@ -34,6 +37,7 @@
                         }
                     </mat-form-field>
 
+                    <!-- Maintenance type selection -->
                     <mat-form-field appearance="outline">
                         <mat-label>Maintenance Type</mat-label>
                         <mat-select formControlName="maintenanceType">
@@ -51,6 +55,7 @@
                         }
                     </mat-form-field>
 
+                    <!-- Maintenance description -->
                     <mat-form-field appearance="outline">
                         <mat-label>Description</mat-label>
                         <input matInput formControlName="description">
@@ -68,7 +73,7 @@
                         }
                     </mat-form-field>
 
-                    <!-- Display the dates and cost alongside each other -->
+                    <!-- Maintenance dates and associated cost -->
                     <div class="date-cost-fields">
                         <mat-form-field appearance="outline">
                             <mat-label>Start Date</mat-label>
@@ -110,10 +115,12 @@
                         </mat-form-field>
                     </div>
 
+                    <!-- Display an error if the end date is not after the start date -->
                     @if (maintenanceForm.hasError('invalidDateRange') && (maintenanceForm.get('startDate')?.touched || maintenanceForm.get('endDate')?.touched)) {
                         <p class="error-message" role="alert">End date must be after the start date.</p>
                     }
 
+                    <!-- Additional maintenance notes -->
                     <mat-form-field appearance="outline">
                         <mat-label>Notes</mat-label>
                         <textarea matInput rows="2" formControlName="notes"></textarea>
@@ -127,14 +134,17 @@
                         }
                     </mat-form-field>
 
-                    @if (isSaving) {
-                        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+                    <!-- Display progress while saving the maintenance record -->
+                    @if (saving()) {
+                        <mat-progress-bar mode="indeterminate" aria-label="Saving maintenance record"></mat-progress-bar>
                     }
 
                     <!-- Form submission and cancellation actions -->
                     <div class="form-actions">
-                        <button matButton="filled" type="submit" [disabled]="maintenanceForm.invalid || isLoading || isSaving">
-                            {{ isSaving ? 'Saving...' : (maintenanceId ? 'Update Maintenance Record' : 'Add Maintenance Record') }}
+                        <button matButton="filled"
+                                type="submit"
+                                [disabled]="maintenanceForm.invalid || loading() || saving()">
+                            {{ saving() ? 'Saving...' : (maintenanceId ? 'Update Maintenance Record' : 'Add Maintenance Record') }}
                         </button>
 
                         <a matButton="outlined" routerLink="/maintenance">

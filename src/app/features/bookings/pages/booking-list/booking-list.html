@@ -28,6 +28,7 @@
                                 </span>
                             </div>
 
+                            <!-- Booking details -->
                             <div class="booking-details">
                                 <p><strong>Equipment:</strong> {{ booking.equipmentName }}</p>
                                 <p><strong>Start date:</strong> {{ booking.startDate | date:'mediumDate' }}</p>
@@ -38,11 +39,17 @@
 
                             <!-- Actions for the individual booking record -->
                             <div class="record-actions">
-                                <a matButton="outlined" [routerLink]="['/bookings', booking._id, 'edit']">
+                                <a matButton="outlined"
+                                   [routerLink]="['/bookings', booking._id, 'edit']"
+                                   aria-label="Edit booking for {{ booking.customerName }}">
                                     Edit
                                 </a>
 
-                                <button matButton="outlined" class="button-danger" type="button" (click)="deleteBooking(booking._id, booking.customerName)">
+                                <button matButton="outlined"
+                                        class="button-danger"
+                                        type="button"
+                                        aria-label="Delete booking for {{ booking.customerName }}"
+                                        (click)="deleteBooking(booking._id, booking.customerName)">
                                     Delete
                                 </button>
                             </div>
@@ -50,6 +57,7 @@
                     }
                 </div>
             } @else {
+                <!-- Display a message when no booking records exist -->
                 <div class="empty-message">
                     <h2>No bookings found</h2>
                     <p>There are currently no rental bookings available.</p>
@@ -59,7 +67,8 @@
                 </div>
             }
         } @else {
-            <p>Loading bookings...</p>
+            <!-- Display a loading message while bookings are being retrieved -->
+            <p role="status">Loading bookings...</p>
         }
     }
 </div>

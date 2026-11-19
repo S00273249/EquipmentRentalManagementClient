@@ -1,4 +1,5 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -27,6 +28,7 @@ import { notBlank } from '../../../../shared/validators/not-blank.validator';
 })
 export class CustomerForm implements OnInit {
 
+    // Inject services and utilities required by the component
     private formBuilder = inject(FormBuilder);
     private customerService = inject(CustomerService);
     private route = inject(ActivatedRoute);
@@ -36,7 +38,8 @@ export class CustomerForm implements OnInit {
     // Store the customer ID when editing an existing customer
     customerId: string | null = null;
 
-    // Track loading and saving states
+    // Track loading and saving states using signals
+    // Signals notify Angular when their values change so the view can update
     loading = signal(false);
     saving = signal(false);
     saveError = signal<string | null>(null);
@@ -73,9 +76,13 @@ export class CustomerForm implements OnInit {
 
                 this.loading.set(false);
             },
-            error: (error: Error) => {
+            error: (error: HttpErrorResponse) => {
                 console.error('Error retrieving customer:', error);
-                this.saveError.set('Unable to retrieve this customer. Please try again.');
+                this.saveError.set(
+                    typeof error.error?.message === 'string'
+                        ? error.error.message
+                        : 'Unable to retrieve this customer. Please try again.'
+                );
                 this.loading.set(false);
             }
         });
@@ -83,7 +90,13 @@ export class CustomerForm implements OnInit {
 
     // Validate and submit the customer form
     onSubmit(): void {
-        if (this.customerForm.invalid || this.saving() || this.loading()) {
+        if (this.saving() || this.loading()) {
+            return;
+        }
+
+        // Display validation messages if the form is invalid
+        if (this.customerForm.invalid) {
+            this.customerForm.markAllAsTouched();
             return;
         }
 
@@ -98,9 +111,11 @@ export class CustomerForm implements OnInit {
             address
         };
 
-        // Set the saving state and disable the form
+        // Set the saving state and clear any previous error
         this.saving.set(true);
         this.saveError.set(null);
+
+        // Disable the form while the customer is being saved
         this.customerForm.disable();
 
         // Choose between creating and updating a customer
@@ -120,13 +135,18 @@ export class CustomerForm implements OnInit {
                 // Return to the customer directory
                 this.router.navigate(['/customers']);
             },
-            error: (error: Error) => {
+            error: (error: HttpErrorResponse) => {
                 console.error('Error saving customer:', error);
-                this.saveError.set(error.message);
+                this.saveError.set(
+                    typeof error.error?.message === 'string'
+                        ? error.error.message
+                        : 'Unable to save this customer. Please try again.'
+                );
                 this.saving.set(false);
+
+                // Re-enable the form so the user can correct the information
                 this.customerForm.enable();
             }
         });
     }
-
 }

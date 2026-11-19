@@ -1,7 +1,7 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { HttpErrorResponse } from '@angular/common/http';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -9,7 +9,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { Maintenance, CreateMaintenanceDto } from '../../models/maintenance';
+import { CreateMaintenanceDto } from '../../models/maintenance';
 import { MaintenanceService } from '../../services/maintenance';
 import { EquipmentService } from '../../../equipment/services/equipment';
 import { Equipment } from '../../../equipment/models/equipment';
@@ -35,26 +35,13 @@ import { dateBoundsValidator } from '../../../../shared/validators/date-bounds.v
 })
 export class MaintenanceForm implements OnInit {
 
-    // Inject FormBuilder to create and manage the reactive form
+    // Inject services and utilities required by the component
     private fb = inject(FormBuilder);
-
-    // Inject ActivatedRoute to retrieve the maintenance record ID from the URL
     private route = inject(ActivatedRoute);
-
-    // Inject Router to navigate after saving
     private router = inject(Router);
-
-    // Inject MaintenanceService to communicate with the backend
     private maintenanceService = inject(MaintenanceService);
-
-    // Inject EquipmentService to retrieve equipment for the dropdown
     private equipmentService = inject(EquipmentService);
-
-    // Inject MatSnackBar to display notifications
     private snackBar = inject(MatSnackBar);
-
-    // Inject ChangeDetectorRef to manually trigger change detection when asynchronous operations update component properties
-    private cdr = inject(ChangeDetectorRef);
 
     // Store the maintenance record ID when editing an existing record
     maintenanceId: string | null = null;
@@ -62,14 +49,10 @@ export class MaintenanceForm implements OnInit {
     // Store equipment retrieved from the backend
     equipment: Equipment[] = [];
 
-    // Track whether the form data is currently being loaded
-    isLoading = false;
-
-    // Track whether the maintenance record is currently being saved
-    isSaving = false;
-
-    // Store an error message if loading or saving fails
-    errorMessage = '';
+    // Track loading, saving and error states using signals
+    loading = signal(false);
+    saving = signal(false);
+    saveError = signal<string | null>(null);
 
     // Define the maintenance types available in the dropdown
     maintenanceTypes: string[] = [
@@ -102,7 +85,7 @@ export class MaintenanceForm implements OnInit {
     }
 
     // Create the maintenance form and define its validation rules
-    maintenanceForm = this.fb.group({
+    maintenanceForm = this.fb.nonNullable.group({
         equipmentId: ['', Validators.required],
         maintenanceType: ['', [Validators.required, notBlank]],
         description: ['', [Validators.required, Validators.minLength(2), notBlank]],
@@ -111,9 +94,8 @@ export class MaintenanceForm implements OnInit {
         cost: [0, [Validators.required, Validators.min(0)]],
         notes: ['', [Validators.required, notBlank]]
     }, {
-
-        // Apply a custom form-group validator to compare the start and end dates.
-        // This allows validation to depend on the values of two separate form controls.
+        // Validate the relationship between the start and end dates
+        // A form-group validator can compare values from multiple form controls
         validators: [dateRangeValidator]
     });
 
@@ -127,7 +109,8 @@ export class MaintenanceForm implements OnInit {
 
     // Retrieve equipment from the backend
     loadFormData(): void {
-        this.isLoading = true;
+        this.loading.set(true);
+        this.saveError.set(null);
 
         this.equipmentService.getEquipment().subscribe({
             next: equipment => {
@@ -137,19 +120,18 @@ export class MaintenanceForm implements OnInit {
                 if (this.maintenanceId) {
                     this.loadMaintenanceRecord();
                 } else {
-
                     // Finish loading when creating a new maintenance record
-                    this.isLoading = false;
-
-                    // Mark the component for change detection so Angular updates the view with the latest values
-                    this.cdr.markForCheck();
+                    this.loading.set(false);
                 }
             },
             error: (error: HttpErrorResponse) => {
                 console.error('Error loading equipment:', error);
-                this.errorMessage = 'Unable to load equipment.';
-                this.isLoading = false;
-                this.cdr.markForCheck();
+                this.saveError.set(
+                    typeof error.error?.message === 'string'
+                        ? error.error.message
+                        : 'Unable to load equipment.'
+                );
+                this.loading.set(false);
             }
         });
     }
@@ -162,7 +144,6 @@ export class MaintenanceForm implements OnInit {
 
         this.maintenanceService.getMaintenanceRecordById(this.maintenanceId).subscribe({
             next: record => {
-
                 // Populate the form with the existing maintenance record details
                 this.maintenanceForm.patchValue({
                     equipmentId: record.equipmentId,
@@ -174,25 +155,29 @@ export class MaintenanceForm implements OnInit {
                     notes: record.notes
                 });
 
-                this.isLoading = false;
-
-                // Mark the component for change detection so Angular updates the view with the latest values
-                this.cdr.markForCheck();
+                this.loading.set(false);
             },
             error: (error: HttpErrorResponse) => {
                 console.error('Error loading maintenance record:', error);
-                this.errorMessage = 'Unable to load this maintenance record.';
-                this.isLoading = false;
-                this.cdr.markForCheck();
+                this.saveError.set(
+                    typeof error.error?.message === 'string'
+                        ? error.error.message
+                        : 'Unable to load this maintenance record.'
+                );
+                this.loading.set(false);
             }
         });
     }
 
-    // Handle maintenance form submission
+    // Validate and submit the maintenance form
     onSubmit(): void {
+        // Prevent submission while the form is loading or being saved
+        if (this.loading() || this.saving()) {
+            return;
+        }
 
-        // Prevent submission if the form is invalid or already being saved
-        if (this.maintenanceForm.invalid || this.isSaving) {
+        // Display validation messages if the form is invalid
+        if (this.maintenanceForm.invalid) {
             this.maintenanceForm.markAllAsTouched();
             return;
         }
@@ -201,18 +186,18 @@ export class MaintenanceForm implements OnInit {
         const formValue = this.maintenanceForm.getRawValue();
 
         // Clear previous errors and indicate that the maintenance record is being saved
-        this.errorMessage = '';
-        this.isSaving = true;
+        this.saveError.set(null);
+        this.saving.set(true);
 
         // Create the DTO containing the information required by the API
         const maintenanceData: CreateMaintenanceDto = {
-            equipmentId: formValue.equipmentId!,
-            maintenanceType: formValue.maintenanceType!,
-            description: formValue.description!,
-            startDate: formValue.startDate!,
-            endDate: formValue.endDate!,
-            cost: formValue.cost!,
-            notes: formValue.notes!
+            equipmentId: formValue.equipmentId,
+            maintenanceType: formValue.maintenanceType,
+            description: formValue.description,
+            startDate: formValue.startDate,
+            endDate: formValue.endDate,
+            cost: formValue.cost,
+            notes: formValue.notes
         };
 
         // Choose the appropriate API operation depending on whether a maintenance ID exists
@@ -222,7 +207,6 @@ export class MaintenanceForm implements OnInit {
 
         request.subscribe({
             next: () => {
-
                 // Display a confirmation message after successfully saving the maintenance record
                 const message = this.maintenanceId
                     ? 'Maintenance record updated successfully'
@@ -237,10 +221,13 @@ export class MaintenanceForm implements OnInit {
                 console.error('Error saving maintenance record:', error);
 
                 // Display the error returned by the backend, or a fallback message
-                this.errorMessage = error.error?.message ?? 'Unable to save maintenance record. Please try again.';
+                this.saveError.set(
+                    typeof error.error?.message === 'string'
+                        ? error.error.message
+                        : 'Unable to save maintenance record. Please try again.'
+                );
 
-                this.isSaving = false;
-                this.cdr.markForCheck();
+                this.saving.set(false);
             }
         });
     }

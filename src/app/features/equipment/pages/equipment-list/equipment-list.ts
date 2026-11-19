@@ -1,5 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -19,13 +20,12 @@ import { EquipmentService } from '../../services/equipment';
 })
 export class EquipmentList implements OnInit {
 
-    // Inject the EquipmentService to communicate with the backend
+    // Inject services and utilities required by the component
     private equipmentService = inject(EquipmentService);
-
-    // Inject MatSnackBar to display notifications
     private snackBar = inject(MatSnackBar);
 
-    // Subject used to trigger an equipment list refresh
+    // Subject used to trigger a refresh of the equipment list
+    // Calling next() on this Subject causes the equipment Observable to retrieve the latest data
     private refreshEquipment$ = new Subject<void>();
 
     // Observable containing the equipment returned by the API
@@ -37,17 +37,21 @@ export class EquipmentList implements OnInit {
     // Retrieve equipment when the component is initialised
     ngOnInit(): void {
         this.equipment$ = this.refreshEquipment$.pipe(
-            // Automatically retrieve equipment when the component loads
+            // Emit an initial value when the Observable is subscribed to, triggering the first data retrieval
             startWith(undefined),
 
             // Retrieve equipment whenever the refresh Subject emits
+            // switchMap switches to the latest API request if another refresh is triggered
             switchMap(() => {
                 this.errorMessage = '';
 
                 return this.equipmentService.getEquipment().pipe(
-                    catchError(error => {
+                    // Handle API errors and return an empty array so the list can still display its empty state
+                    catchError((error: HttpErrorResponse) => {
                         console.error('Error retrieving equipment:', error);
-                        this.errorMessage = 'Unable to load equipment. Please try again later.';
+                        this.errorMessage = typeof error.error?.message === 'string'
+                            ? error.error.message
+                            : 'Unable to load equipment. Please try again later.';
                         return of([]);
                     })
                 );
@@ -79,11 +83,12 @@ export class EquipmentList implements OnInit {
                 // Trigger a refresh of the equipment inventory
                 this.refreshEquipment$.next();
             },
-            error: (error: Error) => {
+            error: (error: HttpErrorResponse) => {
                 console.error('Error deleting equipment:', error);
-                this.errorMessage = 'Unable to delete equipment. Please try again.';
+                this.errorMessage = typeof error.error?.message === 'string'
+                    ? error.error.message
+                    : 'Unable to delete equipment. Please try again.';
             }
         });
     }
-
 }

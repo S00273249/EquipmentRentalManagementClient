@@ -1,6 +1,6 @@
 <div class="page-container">
     <mat-card class="form-card">
-        <!-- Keep the form heading and description inside the card -->
+        <!-- Form heading and description -->
         <mat-card-header class="form-card-header">
             <mat-card-title>
                 {{ bookingId ? 'Edit Booking' : 'Add Booking' }}
@@ -12,15 +12,18 @@
         </mat-card-header>
 
         <mat-card-content>
-            @if (errorMessage) {
-                <p class="error-message" role="alert">{{ errorMessage }}</p>
+            <!-- Display any errors returned while loading or saving the booking -->
+            @if (saveError()) {
+                <p class="error-message" role="alert">{{ saveError() }}</p>
             }
 
-            @if (isLoading) {
-                <p>Loading booking details...</p>
+            <!-- Display a loading message while retrieving booking details -->
+            @if (loading()) {
+                <p role="status">Loading booking details...</p>
             } @else {
                 <form [formGroup]="bookingForm" (ngSubmit)="onSubmit()" class="form-layout">
 
+                    <!-- Customer selection -->
                     <mat-form-field appearance="outline">
                         <mat-label>Customer</mat-label>
                         <mat-select formControlName="customerId">
@@ -36,6 +39,7 @@
                         }
                     </mat-form-field>
 
+                    <!-- Equipment selection -->
                     <mat-form-field appearance="outline">
                         <mat-label>Equipment</mat-label>
                         <mat-select formControlName="equipmentId">
@@ -51,6 +55,7 @@
                         }
                     </mat-form-field>
 
+                    <!-- Booking date selection and validation -->
                     <mat-form-field appearance="outline">
                         <mat-label>Start Date</mat-label>
                         <input matInput type="date" formControlName="startDate" [min]="minDate" [max]="maxDate">
@@ -77,12 +82,14 @@
                         }
                     </mat-form-field>
 
+                    <!-- Display an error if the end date is not after the start date -->
                     @if (bookingForm.hasError('invalidDateRange') && (bookingForm.controls.startDate.touched || bookingForm.controls.endDate.touched)) {
                         <p class="error-message" role="alert">
                             The end date must be after the start date.
                         </p>
                     }
 
+                    <!-- Booking status selection -->
                     <mat-form-field appearance="outline">
                         <mat-label>Status</mat-label>
                         <mat-select formControlName="status">
@@ -94,8 +101,10 @@
 
                     <!-- Form submission and cancellation actions -->
                     <div class="form-actions">
-                        <button matButton="filled" type="submit" [disabled]="bookingForm.invalid || isLoading">
-                            {{ bookingId ? 'Update Booking' : 'Create Booking' }}
+                        <button matButton="filled"
+                                type="submit"
+                                [disabled]="bookingForm.invalid || loading() || saving()">
+                            {{ saving() ? 'Saving...' : (bookingId ? 'Update Booking' : 'Create Booking') }}
                         </button>
 
                         <a matButton="outlined" routerLink="/bookings">

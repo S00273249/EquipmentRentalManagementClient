@@ -26,6 +26,7 @@
                                 <span class="equipment-category">{{ item.category }}</span>
                             </div>
 
+                            <!-- Equipment description and details -->
                             <p class="equipment-description">{{ item.description }}</p>
 
                             <div class="equipment-details">
@@ -36,11 +37,17 @@
 
                             <!-- Actions for the individual equipment record -->
                             <div class="record-actions">
-                                <a matButton="outlined" [routerLink]="['/equipment', item._id, 'edit']">
+                                <a matButton="outlined"
+                                   [routerLink]="['/equipment', item._id, 'edit']"
+                                   aria-label="Edit equipment {{ item.name }}">
                                     Edit
                                 </a>
 
-                                <button matButton="outlined" class="button-danger" type="button" (click)="deleteEquipment(item._id, item.name)">
+                                <button matButton="outlined"
+                                        class="button-danger"
+                                        type="button"
+                                        aria-label="Delete equipment {{ item.name }}"
+                                        (click)="deleteEquipment(item._id, item.name)">
                                     Delete
                                 </button>
                             </div>
@@ -48,6 +55,7 @@
                     }
                 </div>
             } @else {
+                <!-- Display a message when no equipment records exist -->
                 <div class="empty-message">
                     <h2>No equipment found</h2>
                     <p>There are currently no equipment records available.</p>
@@ -57,7 +65,8 @@
                 </div>
             }
         } @else {
-            <p>Loading equipment...</p>
+            <!-- Display a loading message while equipment is being retrieved -->
+            <p role="status">Loading equipment...</p>
         }
     }
 </div>

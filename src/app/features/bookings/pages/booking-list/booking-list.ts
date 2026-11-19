@@ -1,5 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { AsyncPipe, DatePipe, CurrencyPipe } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
@@ -9,7 +10,7 @@ import { Booking } from '../../models/booking';
 import { CustomerService } from '../../../customers/services/customer';
 import { EquipmentService } from '../../../equipment/services/equipment';
 
-// Extend the Booking interface with additional properties used only for displaying customer and equipment names in the list
+// Extend the Booking interface with additional properties used only for displaying customer and equipment names
 interface BookingListItem extends Booking {
     customerName: string;
     equipmentName: string;
@@ -30,23 +31,17 @@ interface BookingListItem extends Booking {
 })
 export class BookingList implements OnInit {
 
-    // Inject BookingService to retrieve and delete bookings
+    // Inject services and utilities required by the component
     private bookingService = inject(BookingService);
-
-    // Inject CustomerService to retrieve customer details
     private customerService = inject(CustomerService);
-
-    // Inject EquipmentService to retrieve equipment details
     private equipmentService = inject(EquipmentService);
-
-    // Inject MatSnackBar to display notifications
     private snackBar = inject(MatSnackBar);
 
-    // Create a Subject that allows the component to manually trigger a new data retrieval operation.
-    // Calling next() on this Subject causes the bookings Observable to retrieve the latest data.
+    // Subject used to trigger a refresh of the bookings list
+    // Calling next() on this Subject causes the bookings Observable to retrieve the latest data
     private refreshBookings$ = new Subject<void>();
 
-    // Observable containing the bookings returned by the API
+    // Observable containing bookings with their associated customer and equipment names
     bookings$!: Observable<BookingListItem[]>;
 
     // Store an error message if retrieving bookings fails
@@ -55,37 +50,44 @@ export class BookingList implements OnInit {
     // Retrieve bookings when the component is initialised
     ngOnInit(): void {
         this.bookings$ = this.refreshBookings$.pipe(
-
-            // Emit an initial value when the Observable is subscribed to, triggering the first data retrieval automatically
+            // Emit an initial value when the Observable is subscribed to, triggering the first data retrieval
             startWith(undefined),
 
-            // Use switchMap to start a new set of API requests whenever the refresh Subject emits.
-            // It switches to the latest Observable and unsubscribes from the previous one if necessary.
+            // Retrieve the latest data whenever the refresh Subject emits
+            // switchMap switches to the new Observable and unsubscribes from the previous one if necessary
             switchMap(() => {
                 this.errorMessage = '';
 
-                // Use forkJoin to execute all three API requests in parallel and wait until they have completed.
-                // Their results are combined into one object so they can be used together below.
+                // Execute all three API requests in parallel and wait until they have completed
+                // forkJoin combines their responses into one object
                 return forkJoin({
                     bookings: this.bookingService.getBookings(),
                     customers: this.customerService.getCustomers(),
                     equipment: this.equipmentService.getEquipment()
                 }).pipe(
+                    // Match customer and equipment IDs to their names
+                    // Map provides efficient lookups without repeatedly searching the original arrays
+                    map(({ bookings, customers, equipment }) => {
+                        const customerNames = new Map(
+                            customers.map(customer => [customer._id, customer.name])
+                        );
 
-                    // Use map to transform the booking results by adding the corresponding customer and equipment names.
-                    // The API only returns their IDs, so the customer and equipment collections are searched to find the matching names.
-                    map(({ bookings, customers, equipment }) =>
-                        bookings.map(booking => ({
+                        const equipmentNames = new Map(
+                            equipment.map(item => [item._id, item.name])
+                        );
+
+                        // Add the corresponding customer and equipment names to each booking
+                        return bookings.map(booking => ({
                             ...booking,
-                            customerName: customers.find(customer => customer._id === booking.customerId)?.name ?? 'Unknown customer',
-                            equipmentName: equipment.find(item => item._id === booking.equipmentId)?.name ?? 'Unknown equipment'
-                        }))
-                    ),
+                            customerName: customerNames.get(booking.customerId) ?? 'Unknown customer',
+                            equipmentName: equipmentNames.get(booking.equipmentId) ?? 'Unknown equipment'
+                        }));
+                    }),
 
-                    // Catch errors from any of the API requests, display an error message and return an empty array
-                    catchError(error => {
+                    // Handle errors from any of the API requests and return an empty array
+                    catchError((error: HttpErrorResponse) => {
                         console.error('Error retrieving bookings:', error);
-                        this.errorMessage = 'Unable to load bookings. Please try again later.';
+                        this.errorMessage = error.error?.message ?? 'Unable to load bookings. Please try again later.';
                         return of([]);
                     })
                 );
@@ -103,25 +105,27 @@ export class BookingList implements OnInit {
             return;
         }
 
+        // Clear previous error messages
+        this.errorMessage = '';
+
         // Send the delete request to the backend
         this.bookingService.deleteBooking(id).subscribe({
             next: () => {
-
                 // Display a success notification
                 this.snackBar.open('Booking deleted successfully', 'Close', {
                     duration: 5000
                 });
 
-                // Trigger a refresh of the bookings list by emitting a value from the Subject.
-                // This causes the switchMap pipeline to execute the API requests again and retrieve the updated data.
+                // Trigger a refresh of the bookings list
+                // The Subject emission causes the switchMap pipeline to retrieve the updated data
                 this.refreshBookings$.next();
             },
-            error: error => {
+            error: (error: HttpErrorResponse) => {
                 console.error('Error deleting booking:', error);
 
                 // Display the error returned by the backend, or a fallback message
                 this.snackBar.open(
-                    error.error?.message ?? 'Unable to delete booking.',
+                    error.error?.message ?? 'Unable to delete booking. Please try again.',
                     'Close',
                     { duration: 5000 }
                 );
