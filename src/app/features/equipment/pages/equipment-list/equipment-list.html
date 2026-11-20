@@ -11,15 +11,126 @@
         </a>
     </div>
 
+    <!-- Equipment search and filtering toolbar -->
+    <div class="filter-container">
+        <div class="filter-header equipment-filter-header">
+            <!-- Filter heading and description -->
+            <div class="filter-heading">
+                <h2>Filters</h2>
+                <p>Refine your equipment inventory.</p>
+            </div>
+
+            <!-- Search equipment by name or description -->
+            <div class="search-container equipment-search-container">
+                <div class="search-input-wrapper">
+                    <input
+                        id="equipment-search"
+                        type="text"
+                        aria-label="Search equipment"
+                        placeholder="Search equipment..."
+                        [(ngModel)]="searchTerm">
+
+                    <!-- Display an X button when the search field contains text -->
+                    <button
+                        type="button"
+                        class="search-clear-button"
+                        aria-label="Clear equipment search"
+                        (click)="clearSearch()"
+                        [hidden]="!searchTerm">
+                        &times;
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="filter-controls">
+            <!-- Filter by equipment category -->
+            <div class="filter-field">
+                <label for="category">Category</label>
+                <select id="category" name="category" [(ngModel)]="filters.category">
+                    <option value="">All Categories</option>
+                    <option value="Camera">Camera</option>
+                    <option value="Audio">Audio</option>
+                    <option value="Lighting">Lighting</option>
+                    <option value="Computer">Computer</option>
+                    <option value="Tool">Tool</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <!-- Filter by equipment status -->
+            <div class="filter-field">
+                <label for="status">Status</label>
+                <select id="status" name="status" [(ngModel)]="filters.status">
+                    <option value="">All Statuses</option>
+                    <option value="Available">Available</option>
+                    <option value="Maintenance">Maintenance</option>
+                    <option value="Retired">Retired</option>
+                </select>
+            </div>
+
+            <!-- Filter by equipment condition -->
+            <div class="filter-field">
+                <label for="condition">Condition</label>
+                <select id="condition" name="condition" [(ngModel)]="filters.condition">
+                    <option value="">All Conditions</option>
+                    <option value="Excellent">Excellent</option>
+                    <option value="Good">Good</option>
+                    <option value="Fair">Fair</option>
+                    <option value="Poor">Poor</option>
+                </select>
+            </div>
+
+            <!-- Sort equipment by daily rental rate -->
+            <div class="filter-field">
+                <label for="sort">Sort By</label>
+                <select id="sort" name="sort" [(ngModel)]="filters.sort">
+                    <option value="dailyRate">Lowest Daily Rate</option>
+                    <option value="-dailyRate">Highest Daily Rate</option>
+                </select>
+            </div>
+
+            <!-- Filter by availability date range -->
+            <div class="filter-field">
+                <label for="from">Available From</label>
+                <input
+                    type="date"
+                    id="from"
+                    name="from"
+                    [(ngModel)]="filters.from">
+            </div>
+
+            <div class="filter-field">
+                <label for="to">Available Until</label>
+                <input
+                    type="date"
+                    id="to"
+                    name="to"
+                    [(ngModel)]="filters.to">
+            </div>
+        </div>
+
+        <!-- Apply or clear the selected filters -->
+        <div class="filter-actions">
+            <button matButton="outlined" type="button" (click)="clearFilters()">
+                Clear All
+            </button>
+
+            <button matButton="filled" type="button" (click)="applyFilters()">
+                Apply Filters
+            </button>
+        </div>
+    </div>
+
     <!-- Display any errors returned while loading equipment -->
     @if (errorMessage) {
         <p class="error-message" role="alert">{{ errorMessage }}</p>
     } @else {
         @if (equipment$ | async; as equipment) {
-            @if (equipment.length > 0) {
-                <!-- Display equipment records in a responsive card grid -->
+            @if (filteredEquipment.length > 0) {
+                <!-- Display filtered equipment records in a responsive card grid -->
                 <div class="record-grid">
-                    @for (item of equipment; track item._id) {
+                    @for (item of filteredEquipment; track item._id) {
                         <div class="record-card">
                             <div class="equipment-card-header">
                                 <h2>{{ item.name }}</h2>
@@ -55,13 +166,21 @@
                     }
                 </div>
             } @else {
-                <!-- Display a message when no equipment records exist -->
+                <!-- Display different messages depending on whether equipment exists but does not match the search -->
                 <div class="empty-message">
-                    <h2>No equipment found</h2>
-                    <p>There are currently no equipment records available.</p>
-                    <a matButton="filled" routerLink="/equipment/new">
-                        Add Your First Equipment
-                    </a>
+                    @if (searchTerm) {
+                        <h2>No matching equipment found</h2>
+                        <p>No equipment matches "{{ searchTerm }}". Try another search.</p>
+                        <button matButton="outlined" type="button" (click)="clearSearch()">
+                            Clear Search
+                        </button>
+                    } @else {
+                        <h2>No equipment found</h2>
+                        <p>No equipment matches your selected filters.</p>
+                        <button matButton="outlined" type="button" (click)="clearFilters()">
+                            Clear Filters
+                        </button>
+                    }
                 </div>
             }
         } @else {

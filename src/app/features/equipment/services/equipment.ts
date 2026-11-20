@@ -1,7 +1,16 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Equipment, CreateEquipmentDto } from '../models/equipment';
+
+export interface EquipmentFilters {
+    category?: string;
+    status?: string;
+    condition?: string;
+    sort?: string;
+    from?: string;
+    to?: string;
+}
 
 @Injectable({
     providedIn: 'root'
@@ -16,13 +25,24 @@ export class EquipmentService {
 
     constructor(private http: HttpClient) { }
 
-    // Retrieve all equipment from the backend
-    getEquipment(): Observable<Equipment[]> {
+    // Retrieve equipment from the backend, optionally applying filters
+    getEquipment(filters?: EquipmentFilters): Observable<Equipment[]> {
+
+        let params = new HttpParams();
+
+        if (filters) {
+            Object.entries(filters).forEach(([key, value]) => {
+                if (value) {
+                    params = params.set(key, value);
+                }
+            });
+        }
 
         return this.http.get<Equipment[]>(this.apiUrl, {
             headers: {
                 'x-api-key': this.apiKey
-            }
+            },
+            params
         });
     }
 
@@ -65,5 +85,5 @@ export class EquipmentService {
             }
         });
     }
-
+    
 }

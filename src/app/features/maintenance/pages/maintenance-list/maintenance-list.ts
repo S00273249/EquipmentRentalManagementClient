@@ -2,6 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { AsyncPipe, DatePipe, CurrencyPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Observable, Subject, catchError, forkJoin, map, of, startWith, switchMap } from 'rxjs';
@@ -21,6 +22,7 @@ interface MaintenanceListItem extends Maintenance {
         DatePipe,
         CurrencyPipe,
         RouterLink,
+        FormsModule,
         MatButtonModule,
         MatSnackBarModule
     ],
@@ -41,6 +43,13 @@ export class MaintenanceList implements OnInit {
     // Observable containing maintenance records with their associated equipment names
     maintenance$!: Observable<MaintenanceListItem[]>;
 
+    // Store all maintenance records retrieved from the API
+    // This allows the search to filter the existing records without making additional API requests
+    allMaintenanceRecords: MaintenanceListItem[] = [];
+
+    // Store the text entered into the maintenance search field
+    searchTerm = '';
+
     // Store an error message if retrieving maintenance records fails
     errorMessage = '';
 
@@ -56,22 +65,37 @@ export class MaintenanceList implements OnInit {
                 this.errorMessage = '';
 
                 // Execute both API requests in parallel and wait until they have completed
-                // forkJoin combines their responses so equipment IDs can be matched to their names
+                // forkJoin combines their responses after both requests have completed
                 return forkJoin({
                     maintenance: this.maintenanceService.getMaintenanceRecords(),
                     equipment: this.equipmentService.getEquipment()
                 }).pipe(
                     // Match equipment IDs to their names and add the names to the maintenance records
-                    // Map provides efficient lookups without repeatedly searching the original array
+                    // Map stores each ID alongside its name, allowing efficient lookups
                     map(({ maintenance, equipment }) => {
+
+                        // Create a lookup map using equipment IDs as keys and names as values
                         const equipmentNames = new Map(
                             equipment.map(item => [item._id, item.name])
                         );
 
-                        return maintenance.map(record => ({
+                        // Add the corresponding equipment name to each maintenance record
+                        // The spread operator preserves the original properties while adding the display name
+                        const records = maintenance.map(record => ({
                             ...record,
                             equipmentName: equipmentNames.get(record.equipmentId) ?? 'Unknown equipment'
                         }));
+
+                        // Sort all maintenance records chronologically by their start date
+                        // Records with earlier start dates appear first, regardless of whether they are past or upcoming
+                        const sortedRecords = records.sort((a, b) => {
+                            return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
+                        });
+
+                        // Store the complete sorted list so the search can filter it locally
+                        this.allMaintenanceRecords = sortedRecords;
+
+                        return sortedRecords;
                     }),
 
                     // Handle errors from either API request and return an empty array
@@ -80,11 +104,37 @@ export class MaintenanceList implements OnInit {
                         this.errorMessage = typeof error.error?.message === 'string'
                             ? error.error.message
                             : 'Unable to load maintenance records. Please try again later.';
+                        this.allMaintenanceRecords = [];
                         return of([]);
                     })
                 );
             })
         );
+    }
+
+    // Filter maintenance records using the text entered into the search field
+    // The search checks equipment name, notes, description and maintenance type
+    // The search is case-insensitive so uppercase and lowercase letters produce the same results
+    get filteredMaintenanceRecords(): MaintenanceListItem[] {
+        const search = this.searchTerm.toLowerCase().trim();
+
+        // Return the complete maintenance list when the search field is empty
+        if (!search) {
+            return this.allMaintenanceRecords;
+        }
+
+        // Return records where at least one of the four searchable fields contains the search text
+        return this.allMaintenanceRecords.filter(record =>
+            record.equipmentName.toLowerCase().includes(search) ||
+            record.notes.toLowerCase().includes(search) ||
+            record.description.toLowerCase().includes(search) ||
+            record.maintenanceType.toLowerCase().includes(search)
+        );
+    }
+
+    // Clear the search field and restore the complete maintenance list
+    clearSearch(): void {
+        this.searchTerm = '';
     }
 
     // Delete a maintenance record after user confirmation

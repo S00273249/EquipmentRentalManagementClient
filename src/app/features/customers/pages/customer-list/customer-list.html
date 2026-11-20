@@ -11,15 +11,41 @@
         </a>
     </div>
 
+    <!-- Search customers by their contact details -->
+    <div class="search-container">
+        <div class="search-field">
+            <label for="customer-search">Search Customers</label>
+
+            <!-- Update searchTerm whenever the user types -->
+            <div class="search-input-wrapper">
+                <input
+                    id="customer-search"
+                    type="text"
+                    placeholder="Search by name, email, phone or address..."
+                    [(ngModel)]="searchTerm">
+
+                <!-- Display an X button when the search field contains text -->
+                <button
+                    type="button"
+                    class="search-clear-button"
+                    aria-label="Clear customer search"
+                    (click)="clearSearch()"
+                    [hidden]="!searchTerm">
+                    &times;
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Display any errors returned while loading customers -->
     @if (errorMessage) {
         <p class="error-message" role="alert">{{ errorMessage }}</p>
     } @else {
         @if (customers$ | async; as customers) {
-            @if (customers.length > 0) {
-                <!-- Display customer records in a responsive card grid -->
+            @if (filteredCustomers.length > 0) {
+                <!-- Display filtered customer records in a responsive card grid -->
                 <div class="record-grid">
-                    @for (customer of customers; track customer._id) {
+                    @for (customer of filteredCustomers; track customer._id) {
                         <div class="record-card">
                             <div class="customer-card-header">
                                 <h2>{{ customer.name }}</h2>
@@ -52,13 +78,21 @@
                     }
                 </div>
             } @else {
-                <!-- Display a message when no customer records exist -->
+                <!-- Display different messages depending on whether customers exist but do not match the search -->
                 <div class="empty-message">
-                    <h2>No customers found</h2>
-                    <p>There are currently no customer records available.</p>
-                    <a matButton="filled" routerLink="/customers/new">
-                        Add Your First Customer
-                    </a>
+                    @if (searchTerm) {
+                        <h2>No matching customers found</h2>
+                        <p>No customers match "{{ searchTerm }}". Try another search.</p>
+                        <button matButton="outlined" type="button" (click)="clearSearch()">
+                            Clear Search
+                        </button>
+                    } @else {
+                        <h2>No customers found</h2>
+                        <p>There are currently no customer records available.</p>
+                        <a matButton="filled" routerLink="/customers/new">
+                            Add Your First Customer
+                        </a>
+                    }
                 </div>
             }
         } @else {

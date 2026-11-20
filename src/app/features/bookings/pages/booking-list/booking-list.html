@@ -11,6 +11,92 @@
         </a>
     </div>
 
+    <!-- Booking filtering toolbar -->
+    <div class="filter-container">
+        <div class="filter-header">
+            <h2>Filters</h2>
+            <p>Refine your booking records.</p>
+        </div>
+
+        <div class="filter-controls">
+            <!-- Search bookings by customer name -->
+            <div class="filter-field">
+                <label for="customer">Customer</label>
+
+                <!-- Bind the input to the selected customer and notify the component when its value changes -->
+                <!-- matAutocomplete connects the input to the customer suggestions panel below -->
+                <input
+                    id="customer"
+                    type="text"
+                    placeholder="Search customers..."
+                    [ngModel]="customerSelection"
+                    (ngModelChange)="onCustomerSelectionChange($event)"
+                    [matAutocomplete]="customerAutocomplete">
+
+                <!-- Display matching customer suggestions as the user types -->
+                <!-- displayWith tells Angular Material to display the customer's name instead of the entire object -->
+                <mat-autocomplete #customerAutocomplete="matAutocomplete"
+                                  [displayWith]="displayCustomer">
+                    @for (customer of filteredCustomers; track customer._id) {
+                        <!-- Selecting an option passes the complete Customer object to the component -->
+                        <mat-option [value]="customer">
+                            {{ customer.name }}
+                        </mat-option>
+                    }
+                </mat-autocomplete>
+            </div>
+
+            <!-- Search bookings by equipment name -->
+            <div class="filter-field">
+                <label for="equipment">Equipment</label>
+
+                <!-- Bind the input to the selected equipment and notify the component when its value changes -->
+                <!-- matAutocomplete connects the input to the equipment suggestions panel below -->
+                <input
+                    id="equipment"
+                    type="text"
+                    placeholder="Search equipment..."
+                    [ngModel]="equipmentSelection"
+                    (ngModelChange)="onEquipmentSelectionChange($event)"
+                    [matAutocomplete]="equipmentAutocomplete">
+
+                <!-- Display matching equipment suggestions as the user types -->
+                <!-- displayWith displays the equipment name instead of the entire Equipment object -->
+                <mat-autocomplete #equipmentAutocomplete="matAutocomplete"
+                                  [displayWith]="displayEquipment">
+                    @for (item of filteredEquipment; track item._id) {
+                        <!-- Selecting an option passes the complete Equipment object to the component -->
+                        <mat-option [value]="item">
+                            {{ item.name }}
+                        </mat-option>
+                    }
+                </mat-autocomplete>
+            </div>
+
+            <!-- Filter bookings by status -->
+            <div class="filter-field">
+                <label for="status">Status</label>
+                <select id="status" name="status" [(ngModel)]="filters.status">
+                    <option value="">All Statuses</option>
+                    @for (status of bookingStatuses; track status) {
+                        <option [value]="status">{{ status }}</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <!-- Apply or clear the selected filters -->
+        <div class="filter-actions">
+            <button matButton="outlined" type="button" (click)="clearFilters()">
+                Clear All
+            </button>
+
+            <button matButton="filled" type="button" (click)="applyFilters()">
+                Apply Filters
+            </button>
+        </div>
+    </div>
+
     <!-- Display any errors returned while loading bookings -->
     @if (errorMessage) {
         <p class="error-message" role="alert">{{ errorMessage }}</p>
@@ -57,13 +143,13 @@
                     }
                 </div>
             } @else {
-                <!-- Display a message when no booking records exist -->
+                <!-- Display a message when no matching booking records exist -->
                 <div class="empty-message">
                     <h2>No bookings found</h2>
-                    <p>There are currently no rental bookings available.</p>
-                    <a matButton="filled" routerLink="/bookings/new">
-                        Add Your First Booking
-                    </a>
+                    <p>No bookings match your selected filters.</p>
+                    <button matButton="outlined" type="button" (click)="clearFilters()">
+                        Clear Filters
+                    </button>
                 </div>
             }
         } @else {

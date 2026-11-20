@@ -2,9 +2,10 @@ import { Component, inject, OnInit } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Observable, Subject, catchError, of, startWith, switchMap } from 'rxjs';
+import { Observable, Subject, catchError, map, of, startWith, switchMap } from 'rxjs';
 import { Customer } from '../../models/customer';
 import { CustomerService } from '../../services/customer';
 
@@ -13,6 +14,7 @@ import { CustomerService } from '../../services/customer';
     imports: [
         AsyncPipe,
         RouterLink,
+        FormsModule,
         MatButtonModule
     ],
     templateUrl: './customer-list.html',
@@ -31,6 +33,13 @@ export class CustomerList implements OnInit {
     // Observable containing the customers returned by the API
     customers$!: Observable<Customer[]>;
 
+    // Store all customers retrieved from the API
+    // This allows the search to filter the existing data without making another API request
+    allCustomers: Customer[] = [];
+
+    // Store the text entered into the customer search field
+    searchTerm = '';
+
     // Store an error message if the API request fails
     errorMessage = '';
 
@@ -46,17 +55,51 @@ export class CustomerList implements OnInit {
                 this.errorMessage = '';
 
                 return this.customerService.getCustomers().pipe(
+                    // Store the latest customer list so it can be filtered locally
+                    // map transforms the API response while passing the original list through the Observable
+                    map(customers => {
+                        this.allCustomers = customers;
+                        return customers;
+                    }),
+
                     // Handle API errors and return an empty array so the list can still display its empty state
                     catchError((error: HttpErrorResponse) => {
                         console.error('Error retrieving customers:', error);
                         this.errorMessage = typeof error.error?.message === 'string'
                             ? error.error.message
                             : 'Unable to load customers. Please try again later.';
+                        this.allCustomers = [];
                         return of([]);
                     })
                 );
             })
         );
+    }
+
+    // Filter customers using the text entered into the search field
+    // The search checks the customer's name, email, phone number and address
+    // to allow customers to be found using any of their contact details
+    get filteredCustomers(): Customer[] {
+        const search = this.searchTerm.toLowerCase().trim();
+
+        // Return the complete customer list when the search field is empty
+        if (!search) {
+            return this.allCustomers;
+        }
+
+        // Return customers where at least one of their details contains the search text
+        // toLowerCase() makes the search case-insensitive
+        return this.allCustomers.filter(customer =>
+            customer.name.toLowerCase().includes(search) ||
+            customer.email.toLowerCase().includes(search) ||
+            customer.phone.toLowerCase().includes(search) ||
+            customer.address.toLowerCase().includes(search)
+        );
+    }
+
+    // Clear the search field and restore the complete customer list
+    clearSearch(): void {
+        this.searchTerm = '';
     }
 
     // Delete a customer after user confirmation
